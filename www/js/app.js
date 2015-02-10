@@ -18,6 +18,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+	$ionicConfigProvider.views.maxCache(0);
   });
 })
 
@@ -38,26 +39,33 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
   // Each tab has its own nav history stack:
 
-  .state('tab.category', {
-    url: '/category',
+  
+  
+  .state('tab.categories', {
+    url: '/categories',
     views: {
-      'tab-category': {
-        templateUrl: 'templates/tab-Categories.html',
+      'tab-categories': {
+        templateUrl: 'templates/tab-categories.html',
         controller: 'CategoriesCtrl'
       }
     }
   })
   
    .state('tab.category-detail', {
-      url: '/category/:categoryId',
+      url: '/categories/:categoryId',
       views: {
-        'tab-category': {
+        'tab-categories': {
           templateUrl: 'templates/category-detail.html',
-          controller: 'categoryDetailCtrl'
+          controller: 'CategoryDetailCtrl'
         }
       }
     })
 
+	
+	
+	
+	
+	
   .state('tab.chats', {
       url: '/chats',
       views: {
@@ -107,6 +115,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   });
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/tab/category');
+  $urlRouterProvider.otherwise('/tab/categories');
 
 });
