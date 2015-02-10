@@ -102,22 +102,27 @@ angular.module('starter.services', [])
   var categories = [{
     id: 0,
     name: 'Spesa',
+	budget: '100,00',
     icon: ''
   }, {
     id: 1,
     name: 'Carburante',
+	budget: '200,00',
     icon: ''
   }, {
     id: 2,
     name: 'Svago',
+	budget: '50,00',
     icon: ''
   }, {
     id: 3,
     name: 'Mensa',
+	budget: '100,00',
     icon: ''
   }, {
     id: 4,
     name: 'Altro',
+	budget: '75,00',
     icon: ''
   }];
 
@@ -129,6 +134,61 @@ angular.module('starter.services', [])
     get: function(categoryId) {
       // Simple index lookup
       return categories[categoryId];
+    }
+  }
+})
+
+
+
+.factory('Expenses', function() {
+  // Might use a resource here that returns a JSON array
+
+  // Some fake testing data
+  var expenses = [{
+    id: 0,
+    note: 'Spesa',
+    categoryId: 1,
+	value: '44,00',
+	date: '2015-02-09',
+	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
+  }, {
+    id: 1,
+    note: 'Spesa',
+    categoryId: 1,
+	value: '44,00',
+	date: '2015-02-09',
+	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
+  }, {
+    id: 2,
+    note: 'Spesa',
+    categoryId: 1,
+	value: '44,00',
+	date: '2015-02-09',
+	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
+  }, {
+    id: 3,
+    note: 'Spesa',
+    categoryId: 2,
+	value: '44,00',
+	date: '2015-02-09',
+	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
+  }, {
+    id: 4,
+    note: 'Spesa',
+    categoryId: 2,
+	value: '44,00',
+	date: '2015-02-09',
+	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
+  }];
+
+
+  return {
+    all: function() {
+      return expenses;
+    },
+    get: function(expenseId) {
+      // Simple index lookup
+      return expenses[expenseId];
     }
   }
 });

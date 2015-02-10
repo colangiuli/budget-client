@@ -18,7 +18,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
-	$ionicConfigProvider.views.maxCache(0);
+
   });
 })
 
@@ -66,25 +66,33 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 	
 	
 	
-  .state('tab.chats', {
-      url: '/chats',
+  .state('tab.expenses', {
+      url: '/expenses',
       views: {
-        'tab-chats': {
-          templateUrl: 'templates/tab-chats.html',
-          controller: 'ChatsCtrl'
+        'tab-expenses': {
+          templateUrl: 'templates/tab-expenses.html',
+          controller: 'ExpensesCtrl'
         }
       }
     })
-    .state('tab.chat-detail', {
-      url: '/chats/:chatId',
+    .state('tab.expense-detail', {
+      url: '/expenses/:expenseId',
       views: {
-        'tab-chats': {
-          templateUrl: 'templates/chat-detail.html',
-          controller: 'ChatDetailCtrl'
+        'tab-expenses': {
+          templateUrl: 'templates/expense-detail.html',
+          controller: 'ExpenseDetailCtrl'
         }
       }
     })
-
+    .state('tab.expense-add', {
+      url: '/expenses-add',
+      views: {
+        'tab-expenses': {
+          templateUrl: 'templates/expense-add.html',
+          controller: 'ExpenseAddCtrl'
+        }
+      }
+    })
   .state('tab.friends', {
       url: '/friends',
       views: {

@@ -2,14 +2,22 @@ angular.module('starter.controllers', [])
 
 .controller('DashCtrl', function($scope) {})
 
-.controller('ChatsCtrl', function($scope, Chats) {
-  $scope.chats = Chats.all();
-  $scope.remove = function(chat) {
-    Chats.remove(chat);
+.controller('ExpensesCtrl', function($scope, Expenses) {
+  $scope.expenses = Expenses.all();
+  $scope.remove = function(expense) {
+    Expenses.remove(expense);
+  }
+  $scope.edit = function(expense) {
+    //Expenses.remove(expense);
   }
 })
-.controller('ChatDetailCtrl', function($scope, $stateParams, Chats) {
-  $scope.chat = Chats.get($stateParams.chatId);
+.controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses) {
+  $scope.expense = Expenses.get($stateParams.expenseId);
+})
+
+.controller('ExpenseAddCtrl', function($scope, $stateParams, Expenses, Categories) {
+  $scope.category = Categories.get($stateParams.categoryId?$stateParams.categoryId:0);
+  $scope.categories = Categories.all();
 })
 
 .controller('FriendsCtrl', function($scope, Friends) {
