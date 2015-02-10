@@ -24,9 +24,7 @@
 		 <label class="item item-input item-stacked-label">
 		    <span class="input-label">Category</span><br>
 		    <select ng-model="newExpense.categoryId">
-		      <option value=0>Blue</option>
-		      <option selected>Green</option>
-		      <option>Red</option>
+			  <option ng-repeat="item in categories" value= "{{ item.id }}" >{{ item.name }}</option>
 		    </select>
 		  </label>
        <div class="padding">
