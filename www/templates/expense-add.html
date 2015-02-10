@@ -7,16 +7,31 @@
 <ion-view view-title="New Expense">
 
   <ion-content class="padding">
-   <ion-slide-box on-slide-changed="slideHasChanged($index)">
-  <ion-slide>
-    <div class="box blue"><h1>BLUE</h1></div>
-  </ion-slide>
-  <ion-slide>
-    <div class="box yellow"><h1>YELLOW</h1></div>
-  </ion-slide>
-  <ion-slide>
-    <div class="box pink"><h1>PINK</h1></div>
-  </ion-slide>
-</ion-slide-box>
+  <form ng-submit="create(newExpense)">
+       <div class="list">
+		  <label class="item item-input item-stacked-label">
+		    <span class="input-label">Description</span>
+		    <input type="text" placeholder="...." ng-model="newExpense.note">
+		  </label>
+		  <label class="item item-input item-stacked-label">
+		    <span class="input-label">Value</span>
+		    <input type="number" placeholder="$" ng-model="newExpense.value">
+		  </label>
+		  <label class="item item-input item-stacked-label">
+		    <span class="input-label">Date</span>
+		    <input type="date" placeholder="Oggi" ng-model="newExpense.date">
+		  </label>
+		 <label class="item item-input item-stacked-label">
+		    <span class="input-label">Category</span><br>
+		    <select ng-model="newExpense.categoryId">
+		      <option value=0>Blue</option>
+		      <option selected>Green</option>
+		      <option>Red</option>
+		    </select>
+		  </label>
+       <div class="padding">
+         <button type="submit" class="button button-block button-positive">Create Task</button>
+       </div>
+     </form>
   </ion-content>
 </ion-view>

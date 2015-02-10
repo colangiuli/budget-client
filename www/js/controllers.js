@@ -18,6 +18,9 @@ angular.module('starter.controllers', [])
 .controller('ExpenseAddCtrl', function($scope, $stateParams, Expenses, Categories) {
   $scope.category = Categories.get($stateParams.categoryId?$stateParams.categoryId:0);
   $scope.categories = Categories.all();
+  $scope.create = function(expense) {
+    //Expenses.remove(expense);
+  }
 })
 
 .controller('FriendsCtrl', function($scope, Friends) {
