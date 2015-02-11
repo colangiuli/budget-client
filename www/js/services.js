@@ -139,56 +139,54 @@ angular.module('starter.services', [])
 })
 
 
-
-.factory('Expenses', function() {
-  // Might use a resource here that returns a JSON array
-
-  // Some fake testing data
-  var expenses = [{
-    id: 0,
-    note: 'Spesa',
-    categoryId: 1,
-	value: '44,00',
-	date: '2015-02-09',
-	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
-  }, {
-    id: 1,
-    note: 'Spesa',
-    categoryId: 1,
-	value: '44,00',
-	date: '2015-02-09',
-	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
-  }, {
-    id: 2,
-    note: 'Spesa',
-    categoryId: 1,
-	value: '44,00',
-	date: '2015-02-09',
-	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
-  }, {
-    id: 3,
-    note: 'Spesa',
-    categoryId: 2,
-	value: '44,00',
-	date: '2015-02-09',
-	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
-  }, {
-    id: 4,
-    note: 'Spesa',
-    categoryId: 2,
-	value: '44,00',
-	date: '2015-02-09',
-	photo: 'https://pbs.twimg.com/profile_images/491995398135767040/ie2Z_V6e.jpeg'
-  }];
-
-
-  return {
-    all: function() {
-      return expenses;
-    },
-    get: function(expenseId) {
-      // Simple index lookup
-      return expenses[expenseId];
+.factory('Expenses',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS){
+    return {
+        getAll:function(){
+            return $http.get('https://api.parse.com/1/classes/expenses',{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                }
+            });
+        },
+        get:function(id){
+            return $http.get('https://api.parse.com/1/classes/expenses/'+id,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                }
+            });
+        },
+        create:function(data){
+            return $http.post('https://api.parse.com/1/classes/expenses',data,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                    'Content-Type':'application/json'
+                }
+            });
+        },
+        edit:function(id,data){
+            return $http.put('https://api.parse.com/1/classes/expenses/'+id,data,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                    'Content-Type':'application/json'
+                }
+            });
+        },
+        delete:function(id){
+            return $http.delete('https://api.parse.com/1/classes/expenses/'+id,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                    'Content-Type':'application/json'
+                }
+            });
+        }
     }
-  }
+}]).value('PARSE_CREDENTIALS',{
+    APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
+    REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
 });
+

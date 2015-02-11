@@ -3,14 +3,21 @@ angular.module('starter.controllers', [])
 .controller('DashCtrl', function($scope) {})
 
 .controller('ExpensesCtrl', function($scope, Expenses) {
-  $scope.expenses = Expenses.all();
-  $scope.remove = function(expense) {
-    Expenses.remove(expense);
-  }
+	
+	Expenses.getAll().success(function(data){
+        $scope.expenses=data.results;
+    });
+
+  $scope.remove=function(item){
+        Expenses.delete(item.objectId);
+        $scope.expenses.splice($scope.expenses.indexOf(item),1);
+    }
+  
   $scope.edit = function(expense) {
     //Expenses.remove(expense);
   }
 })
+
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses) {
   $scope.expense = Expenses.get($stateParams.expenseId);
 })

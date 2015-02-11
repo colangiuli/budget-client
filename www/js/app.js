@@ -19,7 +19,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       StatusBar.styleDefault();
     }
     //intialize parse
-    Parse.initialize("WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt", "iuRiAFBNVw7aCA7tHQRszUsgjXhnHiDubag4ZCRn");
+    //Parse.initialize("WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt", "iuRiAFBNVw7aCA7tHQRszUsgjXhnHiDubag4ZCRn");
   });
 })
 
