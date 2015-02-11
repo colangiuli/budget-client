@@ -18,7 +18,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
-
+    //intialize parse
+    Parse.initialize("WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt", "iuRiAFBNVw7aCA7tHQRszUsgjXhnHiDubag4ZCRn");
   });
 })
 

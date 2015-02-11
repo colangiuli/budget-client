@@ -1,0 +1,27 @@
+ {"results": [{
+    "id": 0,
+    "name": "Spesa",
+	"budget": 100.00,
+    "icon": ""
+  }, {
+    "id": 1,
+    "name": "Carburante",
+	"budget": 200.00,
+    "icon": ""
+  }, {
+    "id": 2,
+    "name": "Svago",
+	"budget": 50.00,
+    "icon": ""
+  }, {
+    "id": 3,
+    "name": "Mensa",
+	"budget": 100.00,
+    "icon": ""
+  }, {
+    "id": 4,
+    "name": "Altro",
+	"budget": 75.00,
+    "icon": ""
+  }]
+ }
