@@ -1,6 +1,5 @@
 angular.module('starter.controllers', [])
 
-.controller('DashCtrl', function($scope) {})
 
 .controller('ExpensesCtrl', function($scope, Expenses) {
 	
@@ -19,15 +18,22 @@ angular.module('starter.controllers', [])
 })
 
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses) {
-  $scope.expense = Expenses.get($stateParams.expenseId);
+	  //$scope.expense = Expenses.get($stateParams.expenseId);
+	  Expenses.get($stateParams.expenseId).success(function(data){
+				$scope.expense=data;
+	  }); 
 })
 
 .controller('ExpenseAddCtrl', function($scope, $stateParams, Expenses, Categories) {
-  $scope.category = Categories.get($stateParams.categoryId?$stateParams.categoryId:0);
-  $scope.categories = Categories.all();
-  $scope.create = function(expense) {
-    //Expenses.remove(expense);
-  }
+	$scope.category = Categories.get($stateParams.categoryId?$stateParams.categoryId:0);
+	$scope.categories = Categories.all();
+    $scope.expense={};
+
+    $scope.create=function(expense){
+        Expenses.create(expense).success(function(data){
+            $state.go('tab.expenses');
+		});
+	}
 })
 
 .controller('FriendsCtrl', function($scope, Friends) {
