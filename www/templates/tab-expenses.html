@@ -1,4 +1,7 @@
 <ion-view view-title="Expenses">
+    <ion-nav-buttons side="secondary">
+      <button class="button  button-icon icon ion-plus" ng-click="openModal()"></button>
+    </ion-nav-buttons>
   <ion-content>
     <ion-list>
       <ion-item class="item-remove-animate item-avatar  item-icon-right" ng-repeat="expense in expenses" type="item-text-wrap" href="#/tab/expenses/{{expense.objectId}}">

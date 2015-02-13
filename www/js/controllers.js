@@ -1,30 +1,16 @@
 angular.module('starter.controllers', [])
 
-
-.controller('ExpensesCtrl', function($scope, Expenses) {
-	
-	Expenses.getAll().success(function(data){
-        $scope.expenses=data.results;
-    });
-
-  $scope.remove=function(item){
-        Expenses.delete(item.objectId);
-        $scope.expenses.splice($scope.expenses.indexOf(item),1);
-    }
-  
-  $scope.edit = function(expense) {
-    //Expenses.remove(expense);
-  }
-})
-
-.controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses) {
-	  //$scope.expense = Expenses.get($stateParams.expenseId);
+.controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
 	  Expenses.get($stateParams.expenseId).success(function(data){
 				$scope.expense=data;
+				Categories.get(data.categoryID).success(function(data){
+					$scope.category = data;
+				}); 
 	  }); 
 })
 
-.controller('ExpenseAddCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
+.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal) {
+
 ///////////////////////////////////////////////////////
 /////////      INIT
 ///////////////////////////////////////////////////////
@@ -35,24 +21,97 @@ angular.module('starter.controllers', [])
 	$scope.fullString="000";
 	$scope.strDotted = "0,00";
 	$scope.show = "calc";
-	$scope.se
+	
+	Expenses.getAll().success(function(data){
+        $scope.expenses=data.results;
+    });
 	
 	Categories.getAll().success(function(data){
 		var tmpArray = data.results;
-		var elementXpage = 3;
+		var elementXpage = 2;
 		$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
 		var outputArray = Array();
 		for (var idx = 0; tmpArray.length > 0; idx++){
 			outputArray[idx] = tmpArray.splice(0, elementXpage);
 		}
 		$scope.categories = outputArray;
+		$scope.allCategories = tmpArray;
 		$ionicSlideBoxDelegate.update();
 	});
 	
+	$ionicModal.fromTemplateUrl('templates/expense-add-modal.html', {
+		scope: $scope,
+		animation: 'slide-in-up'
+	}).then(function(modal) {
+		$scope.modal = modal
+	})  
 
 ///////////////////////////////////////////////////////
 /////////      FUNCTIONS
 ///////////////////////////////////////////////////////   
+  $scope.openModal = function() {
+  	$scope.newExpense={};
+	$scope.newExpense.date = new Date();
+	$scope.newExpense.note = "--";
+	$scope.newExpense.value = 0;
+	$scope.fullString="000";
+	$scope.strDotted = "0,00";
+	$scope.show = "calc";
+	
+	Categories.getAll().success(function(data){
+		var tmpArray = data.results;
+		var elementXpage = 2;
+		$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
+		var outputArray = Array();
+		for (var idx = 0; tmpArray.length > 0; idx++){
+			outputArray[idx] = tmpArray.splice(0, elementXpage);
+		}
+		$scope.categories = outputArray;
+		$scope.allCategories = tmpArray;
+		$ionicSlideBoxDelegate.update();
+	});
+	
+    $scope.modal.show()
+  }
+  
+    $scope.edit = function(expense) {
+		$scope.newExpense = expense;
+		$scope.strDotted = expense.value + "," + "00";
+		$scope.fullString = expense.value + "00";
+
+		$scope.show = "calc";
+		
+		Categories.getAll().success(function(data){
+			var tmpArray = data.results;
+			var elementXpage = 2;
+			$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
+			var outputArray = Array();
+			for (var idx = 0; tmpArray.length > 0; idx++){
+				outputArray[idx] = tmpArray.splice(0, elementXpage);
+			}
+			$scope.categories = outputArray;
+			$scope.allCategories = tmpArray;
+			$ionicSlideBoxDelegate.update();
+		});
+		
+		$scope.modal.show()
+  }
+
+
+  $scope.closeModal = function() {
+    $scope.modal.hide();
+  };
+
+  $scope.$on('$destroy', function() {
+    $scope.modal.remove();
+  });	
+	
+  $scope.remove=function(item){
+        Expenses.delete(item.objectId);
+        $scope.expenses.splice($scope.expenses.indexOf(item),1);
+    }
+  
+
 	$scope.checkSelected = function(categoryToCheck){
         if($scope.newExpense.categoryID == categoryToCheck){
 			return "redCat";
@@ -73,13 +132,21 @@ angular.module('starter.controllers', [])
 	
 	$scope.create = function(){
 		$scope.newExpense.value = parseInt($scope.strDotted);
-        Expenses.create($scope.newExpense).success(function(data){
-           $state.go('tab.expenses');
-		});
-	}
-	
-	$scope.cancel=function(){
-        $state.go('tab.expenses');
+		if(!!$scope.newExpense.objectId){
+			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
+			   $scope.closeModal();
+			   Expenses.getAll().success(function(data){
+				 $scope.expenses=data.results;
+			   });
+			});
+		}else{
+			Expenses.create($scope.newExpense).success(function(data){
+			   $scope.closeModal();
+			   Expenses.getAll().success(function(data){
+				 $scope.expenses=data.results;
+			   });
+			});
+		}
 	}
 	
 	$scope.addNumber=function(buttonPressed){
