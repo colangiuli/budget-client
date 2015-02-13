@@ -25,31 +25,54 @@ angular.module('starter.controllers', [])
 })
 
 .controller('ExpenseAddCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
-	//$scope.category = Categories.get($stateParams.categoryId?$stateParams.categoryId:0);
-	//$scope.categories = Categories.all();
+///////////////////////////////////////////////////////
+/////////      INIT
+///////////////////////////////////////////////////////
+	$scope.newExpense={};
+	$scope.newExpense.date = new Date();
+	$scope.newExpense.note = "--";
+	$scope.newExpense.value = 0;
+	$scope.fullString="000";
+	$scope.strDotted = "0,00";
+	$scope.show = "calc";
+	
 	Categories.getAll().success(function(data){
 		var tmpArray = data.results;
 		var elementXpage = 2;
+		$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
 		var outputArray = Array();
 		for (var idx = 0; tmpArray.length > 0; idx++){
 			outputArray[idx] = tmpArray.splice(0, elementXpage);
 		}
 		$scope.categories = outputArray;
 		$ionicSlideBoxDelegate.update();
-
 	});
-	$scope.newExpense={};
-	$scope.fullString="000";
-	$scope.strDotted = "0,00";
-    
-	 $scope.navSlide = function(index) {
+	
+
+///////////////////////////////////////////////////////
+/////////      FUNCTIONS
+///////////////////////////////////////////////////////   
+	$scope.navSlide = function(index) {
         $ionicSlideBoxDelegate.slide(index, 500);
     }
 	
-	$scope.create=function(expense){
-        Expenses.create(expense).success(function(data){
-            $state.go('tab.expenses');
+	$scope.showTab = function(tabToShow) {
+        $scope.show = tabToShow;
+    }
+	
+	$scope.setCategory = function(categorySelected) {
+        $scope.newExpense.categoryID = categorySelected;
+    }
+	
+	$scope.create = function(){
+		$scope.newExpense.value = parseInt($scope.strDotted);
+        Expenses.create($scope.newExpense).success(function(data){
+           $state.go('tab.expenses');
 		});
+	}
+	
+	$scope.cancel=function(){
+        $state.go('tab.expenses');
 	}
 	
 	$scope.addNumber=function(buttonPressed){
