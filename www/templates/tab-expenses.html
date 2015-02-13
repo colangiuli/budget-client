@@ -1,4 +1,7 @@
 <ion-view view-title="Expenses">
+<ion-nav-buttons side="secondary">
+  <button class="button  button-icon icon ion-plus-round"  ng-click="openModal()"></button>
+</ion-nav-buttons>
   <ion-content>
     <ion-list>
       <ion-item class="item-remove-animate item-avatar  item-icon-right" ng-repeat="expense in expenses" type="item-text-wrap" href="#/tab/expenses/{{expense.id}}">
@@ -19,4 +22,37 @@
       </ion-item>
     </ion-list>
   </ion-content>
+  <script id="contact-modal.html" type="text/ng-template">
+    <div class="modal">
+      <ion-header-bar>
+        <h1 class="title">Edit Contact</h1>
+      </ion-header-bar>
+      <ion-content>
+	  	<form ng-submit="closeModal(newExpense)">
+	       <div class="list">
+			  <label class="item item-input item-stacked-label">
+			    <span class="input-label">Description</span>
+			    <input type="text" placeholder="...." ng-model="newExpense.note">
+			  </label>
+			  <label class="item item-input item-stacked-label">
+			    <span class="input-label">Value</span>
+			    <input type="number" placeholder="$" ng-model="newExpense.value">
+			  </label>
+			  <label class="item item-input item-stacked-label">
+			    <span class="input-label">Date</span>
+			    <input type="date" placeholder="Oggi" ng-model="newExpense.date">
+			  </label>
+			 <label class="item item-input item-stacked-label">
+			    <span class="input-label">Category</span><br>
+			    <select ng-model="newExpense.categoryId">
+				  <option ng-repeat="item in categories" value= "{{ item.id }}" >{{ item.name }}</option>
+			    </select>
+			  </label>
+	       <div class="padding">
+	         <button type="submit" class="button button-block button-positive">Save</button>
+	       </div>
+	     </form>
+      </ion-content>
+    </div>
+  </script>
 </ion-view>

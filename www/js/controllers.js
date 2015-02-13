@@ -2,14 +2,35 @@ angular.module('starter.controllers', [])
 
 .controller('DashCtrl', function($scope) {})
 
-.controller('ExpensesCtrl', function($scope, Expenses) {
+.controller('ExpensesCtrl', function($scope, $ionicModal, Expenses, Categories) {
   $scope.expenses = Expenses.all();
+  $scope.categories = Categories.all();
   $scope.remove = function(expense) {
     Expenses.remove(expense);
   }
   $scope.edit = function(expense) {
     //Expenses.remove(expense);
   }
+
+  $ionicModal.fromTemplateUrl('contact-modal.html', {
+    scope: $scope,
+    animation: 'slide-in-up'
+  }).then(function(modal) {
+    $scope.modal = modal;
+  })
+
+  $scope.openModal = function() {
+    $scope.modal.show();
+  }
+
+  $scope.closeModal = function() {
+    $scope.modal.hide();
+  };
+
+  $scope.$on('$destroy', function() {
+    $scope.modal.remove();
+  });
+
 })
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses) {
   $scope.expense = Expenses.get($stateParams.expenseId);
