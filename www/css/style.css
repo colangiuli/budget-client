@@ -38,6 +38,12 @@ flex: 0 0 33%;
 max-width: 33%;
 }
 
+.redCat {
+	background-color: red;
+	border-radius: 9px;
+background: cornflowerblue;
+}
+
 .calc_tabs {
 padding: 7px;
 width: 100%;

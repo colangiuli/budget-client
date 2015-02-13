@@ -35,10 +35,11 @@ angular.module('starter.controllers', [])
 	$scope.fullString="000";
 	$scope.strDotted = "0,00";
 	$scope.show = "calc";
+	$scope.se
 	
 	Categories.getAll().success(function(data){
 		var tmpArray = data.results;
-		var elementXpage = 2;
+		var elementXpage = 3;
 		$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
 		var outputArray = Array();
 		for (var idx = 0; tmpArray.length > 0; idx++){
@@ -52,6 +53,12 @@ angular.module('starter.controllers', [])
 ///////////////////////////////////////////////////////
 /////////      FUNCTIONS
 ///////////////////////////////////////////////////////   
+	$scope.checkSelected = function(categoryToCheck){
+        if($scope.newExpense.categoryID == categoryToCheck){
+			return "redCat";
+		}
+    }
+
 	$scope.navSlide = function(index) {
         $ionicSlideBoxDelegate.slide(index, 500);
     }
