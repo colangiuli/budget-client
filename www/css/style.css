@@ -1,13 +1,80 @@
 .col{
   text-align:center !important;
-  background-color: cornflowerblue !important;
+
 }
 
 .row{
-  padding-bottom:20px !important;
+  height:18%;
+}
+
+.slider { height: 100%; text-align: center }
+
+.scroll{
+  height:100%;
 }
 .my-icon:before,
 .my-icon{
   font-size:60px !important;
   display:block !important;
+}
+
+.calc_button {
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 9px;
+background: cornflowerblue;
+text-align: center;
+font-size: 2.0em;
+font-weight: bold;
+//padding-top: 5%;
+
+-webkit-box-flex: 0;
+-webkit-flex: 0 0 20%;
+-moz-box-flex: 0;
+-moz-flex: 0 0 20%;
+-ms-flex: 0 0 20%;
+flex: 0 0 20%;
+max-width: 20%;
+}
+
+.calc_tabs {
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+background: #f7f7f7;
+text-align: center;
+
+-webkit-box-flex: 0;
+-webkit-flex: 0 0 40%;
+-moz-box-flex: 0;
+-moz-flex: 0 0 40%;
+-ms-flex: 0 0 40%;
+flex: 0 0 40%;
+max-width: 40%;
+}
+.calc_value {
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 9px;
+background-color: #222;
+text-align: right !important;
+font-size: 3.0em;
+font-weight: bold;
+color: #62b4c8;
+ padding-top: 8px;
+}
+
+.calc_categories{
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 9px;
+background-color: #222;
+text-align: center;
+}
+
+.slider-pager {
+bottom: 4px !important;
 }

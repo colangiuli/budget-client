@@ -95,48 +95,57 @@ angular.module('starter.services', [])
   }
 })
 
-.factory('Categories', function() {
-  // Might use a resource here that returns a JSON array
-
-  // Some fake testing data
-  var categories = [{
-    id: 0,
-    name: 'Spesa',
-	budget: '100,00',
-    icon: ''
-  }, {
-    id: 1,
-    name: 'Carburante',
-	budget: '200,00',
-    icon: ''
-  }, {
-    id: 2,
-    name: 'Svago',
-	budget: '50,00',
-    icon: ''
-  }, {
-    id: 3,
-    name: 'Mensa',
-	budget: '100,00',
-    icon: ''
-  }, {
-    id: 4,
-    name: 'Altro',
-	budget: '75,00',
-    icon: ''
-  }];
-
-
-  return {
-    all: function() {
-      return categories;
-    },
-    get: function(categoryId) {
-      // Simple index lookup
-      return categories[categoryId];
+.factory('Categories',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS){
+    return {
+        getAll:function(){
+            return $http.get('https://api.parse.com/1/classes/categories',{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                }
+            });
+        },
+        get:function(id){
+            return $http.get('https://api.parse.com/1/classes/categories/'+id,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                }
+            });
+        },
+        create:function(data){
+            return $http.post('https://api.parse.com/1/classes/categories',data,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                    'Content-Type':'application/json'
+                }
+            });
+        },
+        edit:function(id,data){
+            return $http.put('https://api.parse.com/1/classes/categories/'+id,data,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                    'Content-Type':'application/json'
+                }
+            });
+        },
+        delete:function(id){
+            return $http.delete('https://api.parse.com/1/classes/categories/'+id,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                    'Content-Type':'application/json'
+                }
+            });
+        }
     }
-  }
+}]).value('PARSE_CREDENTIALS',{
+    APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
+    REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
 })
+
 
 
 .factory('Expenses',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS){

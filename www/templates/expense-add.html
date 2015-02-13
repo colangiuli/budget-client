@@ -6,8 +6,53 @@
 -->
 <ion-view view-title="New Expense">
 
-  <ion-content class="padding">
-  <form ng-submit="create(newExpense)">
+  <ion-content scroll="false">
+ 		  <!-- value-->
+	<div class="row">
+        <div class="col calc_value">
+          {{ strDotted }}
+        </div>
+    </div>
+	<!-- categories-->
+	  <div class="row">
+        <div class="col calc_categories">
+		<ion-slide-box pager-click="navSlide(index)" does-continue="true">
+			<ion-slide ng-repeat="item in categories">
+					<div class="row">
+					   <div class="col  button  button-icon" ng-repeat="category in item" ng-click="setCategory('{{ category.id }}')"><i class="icon ion-ionic"></i>{{ category.name }}</div>	
+					</div>
+			</ion-slide>
+		</ion-slide-box>
+			<!--<select ng-model="newExpense.categoryID"><option ng-repeat="item in categories" value= "{{ item.id }}" >{{ item.name }}</option></select>-->
+		</div>
+	  </div>	
+	  
+	<div class="row">
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('1')">1</div>	
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('2')">2</div>			
+	   <div class="col  calc_button button  button-icon" ng-click="addNumber('3')">3</div>		
+	   <div class="col  calc_tabs button  button-icon"><i class="icon ion-ionic"></i></div>	
+    </div>
+	<div class="row">
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('4')">4</div>	
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('5')">5</div>			
+	   <div class="col  calc_button button  button-icon" ng-click="addNumber('6')">6</div>		
+	   <div class="col  calc_tabs button  button-icon"><i class="icon ion-ionic"></i></div>		
+    </div>	  
+	<div class="row">
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('7')">7</div>	
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('8')">8</div>			
+	   <div class="col  calc_button button  button-icon" ng-click="addNumber('9')">9</div>		
+	   <div class="col  calc_tabs button  button-icon"><i class="icon ion-checkmark-round"></i></div>	
+    </div>	  	  
+ 	<div class="row">
+       <div class="col  calc_button button  button-icon" ng-click="addNumber('0')">0</div>			
+	   <div class="col  calc_button button  button-icon" ng-click="addNumber('00')">00</div>		
+	   <div class="col  calc_button button  button-icon" ng-click="addNumber('D')"><i class="icon ion-arrow-left-c"></i></div>		
+	   <div class="col  calc_tabs button  button-icon"><i class="icon ion-close-round"></i></div>	   	
+    </div>
+  <!--
+  
        <div class="list">
 		  <label class="item item-input item-stacked-label">
 		    <span class="input-label">Description</span>
@@ -28,8 +73,7 @@
 		    </select>
 		  </label>
        <div class="padding">
-         <button type="submit" class="button button-block button-positive">Create Task</button>
+  -->      
        </div>
-     </form>
   </ion-content>
 </ion-view>
