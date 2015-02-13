@@ -1,13 +1,92 @@
 .col{
   text-align:center !important;
-  background-color: cornflowerblue !important;
+
+}
+.modal{
+  top: 0 ;
+  bottom: 0 ; 
+  left: 0 ;
+  right: 0 ;
+  width: 100% ;
+}
+.row{
+  height:18%;
 }
 
-.row{
-  padding-bottom:20px !important;
+.slider { height: 100%; text-align: center }
+
+.scroll{
+  height:100%;
 }
 .my-icon:before,
 .my-icon{
   font-size:60px !important;
   display:block !important;
+}
+
+.calc_button {
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 9px;
+background: cornflowerblue;
+text-align: center;
+font-size: 2.0em;
+font-weight: bold;
+//padding-top: 5%;
+
+-webkit-box-flex: 0;
+-webkit-flex: 0 0 33%;
+-moz-box-flex: 0;
+-moz-flex: 0 0 33%;
+-ms-flex: 0 0 33%;
+flex: 0 0 33%;
+max-width: 33%;
+}
+
+.redCat {
+	background-color: red;
+	border-radius: 9px;
+background: cornflowerblue;
+}
+
+.calc_tabs {
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+background: #f7f7f7;
+text-align: center;
+
+-webkit-box-flex: 0;
+-webkit-flex: 0 0 100%;
+-moz-box-flex: 0;
+-moz-flex: 0 0 100%;
+-ms-flex: 0 0 100%;
+flex: 0 0 100%;
+max-width: 100%;
+}
+.calc_value {
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 9px;
+background-color: #222;
+text-align: right !important;
+font-size: 3.0em;
+font-weight: bold;
+color: #62b4c8;
+ padding-top: 8px;
+}
+
+.calc_categories{
+padding: 7px;
+width: 100%;
+border: 1px solid #ddd;
+border-radius: 9px;
+background-color: #222;
+text-align: center;
+}
+
+.slider-pager {
+bottom: 4px !important;
 }
