@@ -105,6 +105,14 @@ angular.module('starter.services', [])
                 }
             });
         },
+        getFull:function(){
+            return $http.post('https://api.parse.com/1/functions/categoriesFull',{},{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                }
+            });
+        },
         get:function(id){
             return $http.get('https://api.parse.com/1/classes/categories/'+id,{
                 headers:{
@@ -147,7 +155,6 @@ angular.module('starter.services', [])
 })
 
 
-
 .factory('Expenses',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS){
     return {
         getAll:function(){
@@ -155,15 +162,42 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-                }
+                },
+				params:  { 
+		            //where: whereQuery,
+		            //limit: 2,
+		            // count: 1
+			   		'include': 'categoryID'
+	            }
             });
         },
+        getAllByCatId:function(categoryId){
+            return $http.get('https://api.parse.com/1/classes/expenses',{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                },
+				params:  { 
+		            where: {"categoryID":{"__type":"Pointer","className":"categories","objectId":categoryId}},
+		            //limit: 2,
+		            // count: 1
+			   		//'include': 'categoryID'
+	            }
+            });
+        },
+
         get:function(id){
             return $http.get('https://api.parse.com/1/classes/expenses/'+id,{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-                }
+                },
+				params:  { 
+	                 //where: whereQuery,
+	                 //limit: 2,
+	                 // count: 1
+					'include': 'categoryID'
+              }
             });
         },
         create:function(data){

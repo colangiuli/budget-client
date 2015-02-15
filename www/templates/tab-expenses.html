@@ -6,9 +6,9 @@
     <ion-list>
       <ion-item class="item-remove-animate item-avatar  item-icon-right" ng-repeat="expense in expenses" type="item-text-wrap" href="#/tab/expenses/{{expense.objectId}}">
         <img ng-src="{{expense.face}}">
-        <h2>{{expense.note}}</h2>
+        <h2>{{expense.date | date:dateFormat}} - {{expense.note}}</h2>
 				    <span class="item-note">{{expense.value}} €</span>
-        <p>{{expense.note}}</p>
+        <p>{{expense.categoryID.name}}</p>
 
   
         <i class="icon ion-chevron-right icon-accessory"></i>

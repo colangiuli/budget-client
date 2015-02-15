@@ -21,6 +21,10 @@ angular.module('starter.controllers', [])
 	$scope.fullString="000";
 	$scope.strDotted = "0,00";
 	$scope.show = "calc";
+	$scope.dateFormat = 'dd-MM-yyyy HH:mm';
+
+
+
 	
 	Expenses.getAll().success(function(data){
         $scope.expenses=data.results;
@@ -53,6 +57,11 @@ angular.module('starter.controllers', [])
   	$scope.newExpense={};
 	$scope.newExpense.date = new Date();
 	$scope.newExpense.note = "--";
+		$scope.newExpense.categoryID = {
+		    "__type": "Pointer",
+		    "className":"categories",
+		    "objectId": ""
+		}
 	$scope.newExpense.value = 0;
 	$scope.fullString="000";
 	$scope.strDotted = "0,00";
@@ -61,7 +70,7 @@ angular.module('starter.controllers', [])
 	Categories.getAll().success(function(data){
 		var tmpArray = data.results;
 		var elementXpage = 2;
-		$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
+		$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 		var outputArray = Array();
 		for (var idx = 0; tmpArray.length > 0; idx++){
 			outputArray[idx] = tmpArray.splice(0, elementXpage);
@@ -76,15 +85,24 @@ angular.module('starter.controllers', [])
   
     $scope.edit = function(expense) {
 		$scope.newExpense = expense;
-		$scope.strDotted = expense.value + "," + "00";
-		$scope.fullString = expense.value + "00";
+		$scope.strDotted = expense.value;
+	
+		leftString = parseInt(expense.value.substr(0,expense.value.length-3)).toString();
+		rightString = expense.value.substr(expense.value.length-2,2);
+		$scope.fullString = leftString + rightString;
+		$scope.newExpense.categoryID = {
+		    "__type": "Pointer",
+		    "className":"categories",
+		    "objectId": $scope.newExpense.categoryID.objectId
+		}
+		//devo anche andare alla slide giusta!!!!!!!!!!
 
 		$scope.show = "calc";
 		
 		Categories.getAll().success(function(data){
 			var tmpArray = data.results;
 			var elementXpage = 2;
-			$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
+		//	$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 			var outputArray = Array();
 			for (var idx = 0; tmpArray.length > 0; idx++){
 				outputArray[idx] = tmpArray.splice(0, elementXpage);
@@ -113,7 +131,7 @@ angular.module('starter.controllers', [])
   
 
 	$scope.checkSelected = function(categoryToCheck){
-        if($scope.newExpense.categoryID == categoryToCheck){
+        if($scope.newExpense.categoryID.objectId == categoryToCheck){
 			return "redCat";
 		}
     }
@@ -127,11 +145,11 @@ angular.module('starter.controllers', [])
     }
 	
 	$scope.setCategory = function(categorySelected) {
-        $scope.newExpense.categoryID = categorySelected;
+        $scope.newExpense.categoryID.objectId = categorySelected;
     }
 	
 	$scope.create = function(){
-		$scope.newExpense.value = parseInt($scope.strDotted);
+		$scope.newExpense.value = $scope.strDotted;		
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
 			   $scope.closeModal();
@@ -182,11 +200,24 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CategoriesCtrl', function($scope, Categories) {
-  $scope.categories = Categories.all();
+	Categories.getFull().success(function(data){
+      $scope.categories=data.result;
+  });
 })
 
-.controller('CategoryDetailCtrl', function($scope, $stateParams, Categories) {
-  $scope.category = Categories.get($stateParams.categoryId);
+.controller('CategoryDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
+	  Categories.get($stateParams.categoryId).success(function(data){
+		$scope.category = data;
+		$scope.used = '0,00';
+	  });
+	  Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
+	  	$scope.expenses = data.results;
+		var sum = 0;
+		for (var idx = 0;idx < data.results.length; idx++){
+			sum += parseFloat(data.results[idx].value);
+		}
+		$scope.used = 	sum.toFixed(2);
+	  });
 })
 
 

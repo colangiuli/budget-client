@@ -62,11 +62,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       }
     })
 
-	
-	
-	
-	
-	
   .state('tab.expenses', {
       url: '/expenses',
       views: {
@@ -82,15 +77,6 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
         'tab-expenses': {
           templateUrl: 'templates/expense-detail.html',
           controller: 'ExpenseDetailCtrl'
-        }
-      }
-    })
-    .state('tab.expense-add', {
-      url: '/expenses-add',
-      views: {
-        'tab-expenses': {
-          templateUrl: 'templates/expense-add.html',
-          controller: 'ExpenseAddCtrl'
         }
       }
     })

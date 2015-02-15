@@ -1,43 +1,25 @@
 <ion-view view-title="Categories">
     <ion-nav-buttons side="secondary">
-      <button class="button  button-icon icon ion-plus-round" ng-click="doSomething()" ng-href="#/creaNotaSpese"></button>
+      <button class="button  button-icon icon ion-plus"></button>
     </ion-nav-buttons>
-  <ion-content scroll="false" class="padding">
-    <div class="row">
-        <div class="col col-25">
-          <a href="#/tab/categories/1" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-        </div>
+  <ion-content>
+    <ion-list>
+      <ion-item class="item-remove-animate item-avatar  item-icon-right" ng-repeat="category in categories" type="item-text-wrap" href="#/tab/categories/{{category.objectId}}">
+        <img ng-src="{{category.icon}}">
+        <h2>{{category.name}}</h2>
+				    <span class="item-note">{{category.used}} / {{category.budget}} €</span>
+        <p>shared: {{category.shared}}</p>
 
-        <div class="col col-25 col-offset-10">
-			<a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-		</div>
-        <div class="col col-25 col-offset-10">
-			<a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col col-25">
-          <a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-        </div>
+  
+        <i class="icon ion-chevron-right icon-accessory"></i>
 
-        <div class="col col-25 col-offset-10">
-			<a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-		</div>
-        <div class="col col-25 col-offset-10">
-			<a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col col-25">
-          <a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-        </div>
-
-        <div class="col col-25 col-offset-10">
-			<a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-		</div>
-        <div class="col col-25 col-offset-10">
-			<a href="" class="button button-icon">Spesa	<i class="icon ion-ionic my-icon"></i>13$/25$</a>
-        </div>
-      </div>
+        <ion-option-button class="button-positive" ng-click="edit(category)">
+          Edit
+        </ion-option-button>
+		<ion-option-button class="button-assertive" ng-click="remove(category)">
+          Delete
+        </ion-option-button>
+      </ion-item>
+    </ion-list>
   </ion-content>
 </ion-view>

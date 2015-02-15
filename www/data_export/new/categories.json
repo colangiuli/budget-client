@@ -1,0 +1,52 @@
+{ "results": [
+	{
+        "budget": 100,
+        "createdAt": "2015-02-11T15:23:21.290Z",
+        "icon": "",
+        "id": 0,
+        "name": "Spesa",
+        "objectId": "O7ENiVQ6FV",
+        "shared": true,
+        "updatedAt": "2015-02-13T17:09:05.472Z"
+    },
+	{
+        "budget": 200,
+        "createdAt": "2015-02-11T15:23:21.321Z",
+        "icon": "",
+        "id": 1,
+        "name": "Carburante",
+        "objectId": "mHuIY3eIs4",
+        "shared": false,
+        "updatedAt": "2015-02-13T17:09:08.940Z"
+    },
+	{
+        "budget": 50,
+        "createdAt": "2015-02-11T15:23:21.345Z",
+        "icon": "",
+        "id": 2,
+        "name": "Svago",
+        "objectId": "Dub97vu82q",
+        "shared": false,
+        "updatedAt": "2015-02-13T17:09:11.420Z"
+    },
+	{
+        "budget": 100,
+        "createdAt": "2015-02-11T15:23:21.399Z",
+        "icon": "",
+        "id": 3,
+        "name": "Mensa",
+        "objectId": "kuvcxMlcNq",
+        "shared": false,
+        "updatedAt": "2015-02-13T17:09:14.287Z"
+    },
+	{
+        "budget": 75,
+        "createdAt": "2015-02-11T15:23:21.422Z",
+        "icon": "",
+        "id": 4,
+        "name": "Altro",
+        "objectId": "efb96cFa5u",
+        "shared": false,
+        "updatedAt": "2015-02-13T17:09:16.550Z"
+    }
+] }
