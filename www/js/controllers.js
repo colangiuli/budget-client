@@ -9,7 +9,7 @@ angular.module('starter.controllers', [])
 	  }); 
 })
 
-.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal) {
+.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
 
 ///////////////////////////////////////////////////////
 /////////      INIT
@@ -22,7 +22,9 @@ angular.module('starter.controllers', [])
 	$scope.strDotted = "0,00";
 	$scope.show = "calc";
 	$scope.dateFormat = 'dd-MM-yyyy HH:mm';
-
+	Users.login().success(function(data){
+        console.log(data);
+    });
 
 
 	
@@ -149,7 +151,9 @@ angular.module('starter.controllers', [])
     }
 	
 	$scope.create = function(){
-		$scope.newExpense.value = $scope.strDotted;		
+		$scope.newExpense.value = $scope.strDotted;
+		
+		$scope.newExpense.ACL = 	{ "BK1lpBvvbS": { "read": true, "write": true}};		
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
 			   $scope.closeModal();

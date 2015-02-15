@@ -155,13 +155,14 @@ angular.module('starter.services', [])
 })
 
 
-.factory('Expenses',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS){
+.factory('Expenses',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS, $rootScope){
     return {
         getAll:function(){
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': "aT4vPWUgn3C7PIBygM8lN1o47"
                 },
 				params:  { 
 		            //where: whereQuery,
@@ -176,6 +177,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': PARSE_CREDENTIALS.SESSION_TOKEN
                 },
 				params:  { 
 		            where: {"categoryID":{"__type":"Pointer","className":"categories","objectId":categoryId}},
@@ -191,6 +193,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': PARSE_CREDENTIALS.SESSION_TOKEN
                 },
 				params:  { 
 	                 //where: whereQuery,
@@ -225,6 +228,25 @@ angular.module('starter.services', [])
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
                     'Content-Type':'application/json'
                 }
+            });
+        }
+    }
+}]).value('PARSE_CREDENTIALS',{
+    APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
+	SESSION_TOKEN:"aT4vPWUgn3C7PIBygM8lN1o47",
+    REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
+
+})
+
+
+.factory('Users',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS,$rootScope){
+    return {
+        login:function(){
+            return $http.get('https://api.parse.com/1/login',{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                },	params:  {"username":"dreammaster83@gmail.com","password":"Luca!2013"}
             });
         }
     }
