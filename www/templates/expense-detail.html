@@ -1,15 +1,16 @@
-<!--
-  This template loads for the 'tab.friend-detail' state (app.js)
-  'friend' is a $scope variable created in the FriendsCtrl controller (controllers.js)
-  The FriendsCtrl pulls data from the Friends service (service.js)
-  The Friends service returns an array of friend data
--->
 <ion-view>
  <ion-nav-title>{{expense.note}}</ion-nav-title>
     <ion-nav-buttons side="secondary">
       <button class="button  button-icon icon ion-edit" ng-click="editExpense(expense)"></button>
     </ion-nav-buttons>
   <ion-content class="padding">
+ 
+  	<div class="row">
+		<div class="col">
+			<h4>{{expense.date | date:dateFormat}}</h4>
+		</div>
+	</div>
+  
   	<div class="row" >
 		<div class="col ">
 			<div class="photo-container">
@@ -20,19 +21,10 @@
 	</div>
   	<div class="row">
 		<div class="col">
-			{{expense.note}}
+			<h2>{{expense.value}} €</h2>	
+			<h4>{{expense.categoryID.name}}</h4>
 		</div>
 	</div>	
-  	<div class="row">
-		<div class="col">
-			{{expense.value}}
-		</div>
-	</div>
-	<div class="row">
-		<div class="col">
-			{{expense.categoryID.name}}
-		</div>
-	</div>
 
   </ion-content>
 </ion-view>

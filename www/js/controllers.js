@@ -2,7 +2,7 @@ angular.module('starter.controllers', [])
 
 
 .controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
-	
+		$scope.dateFormat = 'dd/MM/yyyy HH:mm';
 	//first we have to login
 	Users.login();
 	
@@ -75,14 +75,13 @@ angular.module('starter.controllers', [])
 		Categories.getAll().success(function(data){
 			var tmpArray = data.results;
 			var elementXpage = 2;
-			$scope.allCategories = angular.extend({}, data.results );
-		//	$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
+			$scope.allCategories = data.results;
+			$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 			var outputArray = Array();
-			for (var idx = 0; tmpArray.length > 0; idx++){
-				outputArray[idx] = tmpArray.splice(0, elementXpage);
+			for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
+				outputArray.push(tmpArray.slice(idx, idx+elementXpage));
 			}
 			$scope.categories = outputArray;
-			
 			$ionicSlideBoxDelegate.update();
 		});
 		
@@ -98,10 +97,7 @@ angular.module('starter.controllers', [])
     $scope.editExpenseModalPage.remove();
   });	
 	
-  $scope.removeExpense=function(item){
-        Expenses.delete(item.objectId);
-        $scope.expenses.splice($scope.expenses.indexOf(item),1);
-    }
+
   
 
 	$scope.checkSelected = function(categoryToCheck){
@@ -182,12 +178,15 @@ angular.module('starter.controllers', [])
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
 
-
-	$scope.dateFormat = 'dd/MM/yyyy HH:mm';
-
 	Expenses.getMine().success(function(data){
         $scope.expenses=data.results;
     });
+	
+	  $scope.removeExpense=function(item){
+        Expenses.delete(item.objectId);
+        $scope.expenses.splice($scope.expenses.indexOf(item),1);
+    }
+	
 })
 
 .controller('FriendsCtrl', function($scope, Friends) {
@@ -227,6 +226,11 @@ angular.module('starter.controllers', [])
 		}
 		$scope.used = 	sum.toFixed(2);
 	  });
+	  
+	 $scope.removeExpense=function(item){
+        Expenses.delete(item.objectId);
+        $scope.expenses.splice($scope.expenses.indexOf(item),1);
+    }
 })
 
 
