@@ -7,7 +7,7 @@ The Friends service returns an array of friend data
 <ion-view>
  <ion-nav-title>{{category.name}} Shared:{{category.shared}}</ion-nav-title>
     <ion-nav-buttons side="secondary">
-      <button class="button  button-icon icon ion-plus-round"></button>
+      <button class="button  button-icon icon ion-plus" ng-click="createNewExpense()"></button>
     </ion-nav-buttons>
   <ion-content class="padding">
 
@@ -19,10 +19,10 @@ The Friends service returns an array of friend data
         <h2>{{expense.date | date:dateFormat}} - {{expense.note}}</h2>
 				    <span class="item-note">{{expense.value}} €</span> 
 
-        <ion-option-button class="button-positive" ng-click="edit(expense)">
+        <ion-option-button class="button-positive" ng-click="editExpense(expense)">
           Edit
         </ion-option-button>
-		<ion-option-button class="button-assertive" ng-click="remove(expense)">
+		<ion-option-button class="button-assertive" ng-click="removeExpense(expense)">
           Delete
         </ion-option-button>
       </ion-item>

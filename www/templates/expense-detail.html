@@ -7,18 +7,32 @@
 <ion-view>
  <ion-nav-title>{{expense.note}}</ion-nav-title>
     <ion-nav-buttons side="secondary">
-      <button class="button  button-icon icon ion-edit"></button>
+      <button class="button  button-icon icon ion-edit" ng-click="editExpense(expense)"></button>
     </ion-nav-buttons>
   <ion-content class="padding">
-   <!-- <img ng-src="{{chat.face}}" style="width: 64px; height: 64px">-->
-    <p>
-      {{expense.note}}
-    </p>
-	<p>
-      {{expense.value}}
-    </p>
-	<p>
-      {{expense.categoryID.name}}
-    </p>
+  	<div class="row" >
+		<div class="col ">
+			<div class="photo-container">
+				<img src="http://placehold.it/249x195" />
+				<div class="photo-mask"></div>
+			</div>
+		</div>
+	</div>
+  	<div class="row">
+		<div class="col">
+			{{expense.note}}
+		</div>
+	</div>	
+  	<div class="row">
+		<div class="col">
+			{{expense.value}}
+		</div>
+	</div>
+	<div class="row">
+		<div class="col">
+			{{expense.categoryID.name}}
+		</div>
+	</div>
+
   </ion-content>
 </ion-view>

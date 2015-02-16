@@ -9,9 +9,9 @@
   right: 0 ;
   width: 100% ;
 }
-.row{
+/*.row{
   height:18%;
-}
+}*/
 
 .slider { height: 100%; text-align: center }
 
@@ -89,4 +89,21 @@ text-align: center;
 
 .slider-pager {
 bottom: 4px !important;
+}
+
+
+
+.photo-container {
+  position: relative;
+  /*width: 249px;*/
+}
+
+.photo-mask {
+  top: 0;
+  left: 0;
+  right: 0;
+  position: absolute;
+  height: 195px;
+  width: 100%;
+  background: radial-gradient(circle, transparent 81px, white 81px);
 }

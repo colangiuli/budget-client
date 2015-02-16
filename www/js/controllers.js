@@ -13,18 +13,23 @@ angular.module('starter.controllers', [])
 		scope: $scope,
 		animation: 'slide-in-up'
 	}).then(function(modal) {
-		$scope.modal = modal
+		$scope.editExpenseModalPage = modal
 	})  
 
-  $scope.openModal = function() {
+  $scope.createNewExpense = function() {
   	$scope.newExpense={};
 	$scope.newExpense.date = new Date();
 	$scope.newExpense.note = "--";
-		$scope.newExpense.categoryID = {
-		    "__type": "Pointer",
-		    "className":"categories",
-		    "objectId": ""
-		}
+	$scope.newExpense.categoryID = {
+		"__type": "Pointer",
+		"className":"categories",
+		"objectId": ""
+	};
+	$scope.newExpense.owner = {
+		"__type": "Pointer",
+		"className":"_User",
+		"objectId": $localstorage.get('objectId')
+	};
 	$scope.newExpense.value = 0;
 	$scope.fullString="000";
 	$scope.strDotted = "0,00";
@@ -33,20 +38,20 @@ angular.module('starter.controllers', [])
 	Categories.getAll().success(function(data){
 		var tmpArray = data.results;
 		var elementXpage = 2;
-		$scope.allCategories = angular.extend({}, data.results );
+		$scope.allCategories = data.results;
 		$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 		var outputArray = Array();
-		for (var idx = 0; tmpArray.length > 0; idx++){
-			outputArray[idx] = tmpArray.splice(0, elementXpage);
+		for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
+			outputArray.push(tmpArray.slice(idx, idx+elementXpage));
 		}
 		$scope.categories = outputArray;
 		$ionicSlideBoxDelegate.update();
 	});
 	
-    $scope.modal.show()
+    $scope.editExpenseModalPage.show();
   }
   
-    $scope.edit = function(expense) {
+    $scope.editExpense= function(expense) {
 		$scope.newExpense = expense;
 		$scope.strDotted = expense.value;
 	
@@ -57,7 +62,12 @@ angular.module('starter.controllers', [])
 		    "__type": "Pointer",
 		    "className":"categories",
 		    "objectId": $scope.newExpense.categoryID.objectId
-		}
+		};
+		$scope.newExpense.owner = {
+			"__type": "Pointer",
+			"className":"_User",
+			"objectId": $localstorage.get('objectId')
+		};
 		//devo anche andare alla slide giusta!!!!!!!!!!
 
 		$scope.show = "calc";
@@ -76,19 +86,19 @@ angular.module('starter.controllers', [])
 			$ionicSlideBoxDelegate.update();
 		});
 		
-		$scope.modal.show()
+		$scope.editExpenseModalPage.show()
   }
 
 
-  $scope.closeModal = function() {
-    $scope.modal.hide();
+  $scope.closeExpenseModalPage = function() {
+    $scope.editExpenseModalPage.hide();
   };
 
   $scope.$on('$destroy', function() {
-    $scope.modal.remove();
+    $scope.editExpenseModalPage.remove();
   });	
 	
-  $scope.remove=function(item){
+  $scope.removeExpense=function(item){
         Expenses.delete(item.objectId);
         $scope.expenses.splice($scope.expenses.indexOf(item),1);
     }
@@ -112,20 +122,26 @@ angular.module('starter.controllers', [])
         $scope.newExpense.categoryID.objectId = categorySelected;
     }
 	
-	$scope.create = function(){
+	$scope.createExpense = function(){
 		$scope.newExpense.value = $scope.strDotted;
-		
-		$scope.newExpense.ACL = 	{ "BK1lpBvvbS": { "read": true, "write": true}};		
+		selectedCat = $scope.allCategories.filter(function(item){if (item.objectId == $scope.newExpense.categoryID.objectId) return item;});
+		selectedCat = selectedCat[0];
+		$scope.newExpense.ACL = {};
+		$scope.newExpense.ACL[$localstorage.get('objectId')] = { "read": true, "write": true};
+		if (selectedCat.shared == true){
+			$scope.newExpense.ACL["role:friendsOf_" + $localstorage.get('objectId')] = { "read": true};
+		}
+		//{ $localstorage.get('objectId'): { "read": true, "write": true}};		
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
-			   $scope.closeModal();
+			   $scope.closeExpenseModalPage();
 			   Expenses.getAll().success(function(data){
 				 $scope.expenses=data.results;
 			   });
 			});
 		}else{
 			Expenses.create($scope.newExpense).success(function(data){
-			   $scope.closeModal();
+			   $scope.closeExpenseModalPage();
 			   Expenses.getAll().success(function(data){
 				 $scope.expenses=data.results;
 			   });
@@ -169,7 +185,7 @@ angular.module('starter.controllers', [])
 
 	$scope.dateFormat = 'dd/MM/yyyy HH:mm';
 
-	Expenses.getAll().success(function(data){
+	Expenses.getMine().success(function(data){
         $scope.expenses=data.results;
     });
 })
