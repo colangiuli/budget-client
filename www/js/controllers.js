@@ -54,6 +54,7 @@ angular.module('starter.controllers', [])
     $scope.editExpense= function(expense) {
 		$scope.newExpense = expense;
 		$scope.strDotted = expense.value;
+		$scope.newExpense.date = new Date($scope.newExpense.date);
 	
 		leftString = parseInt(expense.value.substr(0,expense.value.length-3)).toString();
 		rightString = expense.value.substr(expense.value.length-2,2);
