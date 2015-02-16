@@ -5,10 +5,8 @@
   The Friends service returns an array of friend data
 -->
 <div class="modal">
-    <ion-header-bar>
-      <h1 class="title">Expense</h1>
-    </ion-header-bar>
-  <ion-content scroll="false">
+
+  <ion-content scroll="false" class="padding">
  		  <!-- value-->
 	<div class="row" ng-click="showTab('calc')">
         <div class="col calc_value">
@@ -29,42 +27,42 @@
 		</div>
 	  </div>	
 	  
-	<div class="row">
-	  <div class="col" ng-show="show=='calc'">
-			<div class="row">
+	<div class="row calc-container">
+	  <div class="col calc-col" ng-show="show=='calc'">
+			<div class="row button-row">
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('1')">1</div>	
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('2')">2</div>			
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('3')">3</div>		
 			</div>
-			<div class="row">
+			<div class="row button-row">
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('4')">4</div>	
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('5')">5</div>			
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('6')">6</div>		
 			</div>	  
-			<div class="row">
+			<div class="row button-row">
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('7')">7</div>	
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('8')">8</div>			
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('9')">9</div>		
 			</div>	  	  
-			<div class="row">
+			<div class="row button-row">
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('0')">0</div>			
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('00')">00</div>		
 			   <div class="col  calc_button button  button-icon" ng-click="addNumber('D')"><i class="icon ion-arrow-left-c"></i></div>		   	
 			</div>  
 	  </div>
-	  <div class="col" ng-show="show=='calendar'">
+	  <div class="col calendar-col" ng-show="show=='calendar'">
 			<div class="row">
 			  	<span class="input-label">Date</span>
 				<input type="date" ng-model="newExpense.date">
 			</div>  
 	  </div>
-	  <div class="col" ng-show="show=='detail'">
+	  <div class="col detail-col" ng-show="show=='detail'">
 			<div class="row">
 				<span class="input-label">Description</span>
 			   <input type="text" placeholder="...." ng-model="newExpense.note">
 			</div>  
 	  </div>
-	  <div class="col col-25">
+	  <div class="col tab-col col-25">
 			<div class="row">
 			   <div class="col  calc_tabs button  button-icon" ng-click="showTab('calendar')"><i class="icon ion-calendar"></i></div>	
 			</div>
