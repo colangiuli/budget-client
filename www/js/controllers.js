@@ -1,50 +1,14 @@
 angular.module('starter.controllers', [])
 
-.controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
-	  Expenses.get($stateParams.expenseId).success(function(data){
-				$scope.expense=data;
-				Categories.get(data.categoryID).success(function(data){
-					$scope.category = data;
-				}); 
-	  }); 
-})
 
-.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
-
+.controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
+	
+	//first we have to login
+	Users.login();
+	
 ///////////////////////////////////////////////////////
-/////////      INIT
-///////////////////////////////////////////////////////
-	$scope.newExpense={};
-	$scope.newExpense.date = new Date();
-	$scope.newExpense.note = "--";
-	$scope.newExpense.value = 0;
-	$scope.fullString="000";
-	$scope.strDotted = "0,00";
-	$scope.show = "calc";
-	$scope.dateFormat = 'dd-MM-yyyy HH:mm';
-	Users.login().success(function(data){
-        console.log(data);
-    });
-
-
-	
-	Expenses.getAll().success(function(data){
-        $scope.expenses=data.results;
-    });
-	
-	Categories.getAll().success(function(data){
-		var tmpArray = data.results;
-		var elementXpage = 2;
-		$scope.newExpense.categoryID = tmpArray[0].objectId | 0;
-		var outputArray = Array();
-		for (var idx = 0; tmpArray.length > 0; idx++){
-			outputArray[idx] = tmpArray.splice(0, elementXpage);
-		}
-		$scope.categories = outputArray;
-		$scope.allCategories = tmpArray;
-		$ionicSlideBoxDelegate.update();
-	});
-	
+/////////      new expense handling
+///////////////////////////////////////////////////////   	
 	$ionicModal.fromTemplateUrl('templates/expense-add-modal.html', {
 		scope: $scope,
 		animation: 'slide-in-up'
@@ -52,9 +16,6 @@ angular.module('starter.controllers', [])
 		$scope.modal = modal
 	})  
 
-///////////////////////////////////////////////////////
-/////////      FUNCTIONS
-///////////////////////////////////////////////////////   
   $scope.openModal = function() {
   	$scope.newExpense={};
 	$scope.newExpense.date = new Date();
@@ -72,13 +33,13 @@ angular.module('starter.controllers', [])
 	Categories.getAll().success(function(data){
 		var tmpArray = data.results;
 		var elementXpage = 2;
+		$scope.allCategories = angular.extend({}, data.results );
 		$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 		var outputArray = Array();
 		for (var idx = 0; tmpArray.length > 0; idx++){
 			outputArray[idx] = tmpArray.splice(0, elementXpage);
 		}
 		$scope.categories = outputArray;
-		$scope.allCategories = tmpArray;
 		$ionicSlideBoxDelegate.update();
 	});
 	
@@ -104,13 +65,14 @@ angular.module('starter.controllers', [])
 		Categories.getAll().success(function(data){
 			var tmpArray = data.results;
 			var elementXpage = 2;
+			$scope.allCategories = angular.extend({}, data.results );
 		//	$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 			var outputArray = Array();
 			for (var idx = 0; tmpArray.length > 0; idx++){
 				outputArray[idx] = tmpArray.splice(0, elementXpage);
 			}
 			$scope.categories = outputArray;
-			$scope.allCategories = tmpArray;
+			
 			$ionicSlideBoxDelegate.update();
 		});
 		
@@ -186,6 +148,30 @@ angular.module('starter.controllers', [])
 		$scope.strDotted = leftString + "," + rightString;
 		$scope.fullString = leftString + rightString;
 	}
+//////////////////////////////////////////////////////
+/////////      end expense handling functions
+///////////////////////////////////////////////////////   
+	
+})
+
+
+.controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
+	  Expenses.get($stateParams.expenseId).success(function(data){
+				$scope.expense=data;
+				Categories.get(data.categoryID).success(function(data){
+					$scope.category = data;
+				}); 
+	  }); 
+})
+
+.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
+
+
+	$scope.dateFormat = 'dd/MM/yyyy HH:mm';
+
+	Expenses.getAll().success(function(data){
+        $scope.expenses=data.results;
+    });
 })
 
 .controller('FriendsCtrl', function($scope, Friends) {
@@ -210,9 +196,12 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CategoryDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
-	  Categories.get($stateParams.categoryId).success(function(data){
+	
+	$scope.used = '0,00';	
+	
+	Categories.get($stateParams.categoryId).success(function(data){
 		$scope.category = data;
-		$scope.used = '0,00';
+		$scope.category.budget = $scope.category.budget.toFixed(2);
 	  });
 	  Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
 	  	$scope.expenses = data.results;

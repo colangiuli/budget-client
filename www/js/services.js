@@ -1,5 +1,22 @@
 angular.module('starter.services', [])
 
+.factory('$localstorage', ['$window', function($window) {
+  return {
+    set: function(key, value) {
+      $window.localStorage[key] = value;
+    },
+    get: function(key, defaultValue) {
+      return $window.localStorage[key] || defaultValue;
+    },
+    setObject: function(key, value) {
+      $window.localStorage[key] = JSON.stringify(value);
+    },
+    getObject: function(key) {
+      return JSON.parse($window.localStorage[key] || '{}');
+    }
+  }
+}])
+
 .factory('Chats', function() {
   // Might use a resource here that returns a JSON array
 
@@ -95,13 +112,14 @@ angular.module('starter.services', [])
   }
 })
 
-.factory('Categories',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS){
+.factory('Categories',['$http','PARSE_CREDENTIALS','$window',function($http,PARSE_CREDENTIALS,$window){
     return {
         getAll:function(){
             return $http.get('https://api.parse.com/1/classes/categories',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 }
             });
         },
@@ -110,6 +128,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 }
             });
         },
@@ -118,6 +137,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 }
             });
         },
@@ -126,6 +146,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
                     'Content-Type':'application/json'
                 }
             });
@@ -135,6 +156,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
                     'Content-Type':'application/json'
                 }
             });
@@ -144,6 +166,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
                     'Content-Type':'application/json'
                 }
             });
@@ -155,14 +178,14 @@ angular.module('starter.services', [])
 })
 
 
-.factory('Expenses',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS, $rootScope){
+.factory('Expenses',['$http','PARSE_CREDENTIALS','$window',function($http,PARSE_CREDENTIALS,$window){
     return {
         getAll:function(){
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': "aT4vPWUgn3C7PIBygM8lN1o47"
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 },
 				params:  { 
 		            //where: whereQuery,
@@ -177,7 +200,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': PARSE_CREDENTIALS.SESSION_TOKEN
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 },
 				params:  { 
 		            where: {"categoryID":{"__type":"Pointer","className":"categories","objectId":categoryId}},
@@ -193,7 +216,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': PARSE_CREDENTIALS.SESSION_TOKEN
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 },
 				params:  { 
 	                 //where: whereQuery,
@@ -208,6 +231,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
                     'Content-Type':'application/json'
                 }
             });
@@ -217,6 +241,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
                     'Content-Type':'application/json'
                 }
             });
@@ -226,6 +251,7 @@ angular.module('starter.services', [])
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
                     'Content-Type':'application/json'
                 }
             });
@@ -233,21 +259,31 @@ angular.module('starter.services', [])
     }
 }]).value('PARSE_CREDENTIALS',{
     APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
-	SESSION_TOKEN:"aT4vPWUgn3C7PIBygM8lN1o47",
     REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
 
 })
 
 
-.factory('Users',['$http','PARSE_CREDENTIALS',function($http,PARSE_CREDENTIALS,$rootScope){
+
+.factory('Users',['$http','PARSE_CREDENTIALS','$window',function($http,PARSE_CREDENTIALS,$window){
     return {
         login:function(){
-            return $http.get('https://api.parse.com/1/login',{
+            $http.get('https://api.parse.com/1/login',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-                },	params:  {"username":"dreammaster83@gmail.com","password":"Luca!2013"}
-            });
+                },	params:  {"username":"Luca","password":"Luca!2013"}
+            }).
+			  success(function(data){
+				// this callback will be called asynchronously
+				// when the response is available
+				$window.localStorage['SESSION_TOKEN'] = data.sessionToken;
+				$window.localStorage['objectId'] = data.objectId;
+			  }).
+			  error(function() {
+				// called asynchronously if an error occurs
+				// or server returns response with an error status.
+			  });
         }
     }
 }]).value('PARSE_CREDENTIALS',{

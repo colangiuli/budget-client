@@ -15,3 +15,5 @@ http://stackoverflow.com/questions/19456183/scaling-a-phonegap-app-for-different
 https://docs.angularjs.org/api/ng/directive/ngShow
 
 http://mcgivery.com/creating-views-with-ionic/
+
+http://thejackalofjavascript.com/ionic-angularjs-and-phonegap-build/

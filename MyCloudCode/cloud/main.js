@@ -96,3 +96,39 @@ Parse.Cloud.define("categoriesFull", function(request, response) {
 
 
 });
+
+Parse.Cloud.define("friend", function(request, response) {
+    var userToFriend = new Parse.User();
+    userToFriend.id = request.params.friendId;
+ 
+    var roleName = "friendsOf_" + request.user.id;
+    var roleQuery = new Parse.Query("_Role");
+    roleQuery.equalTo("name", roleName);
+    roleQuery.first().then(function(role) {
+        role.getUsers().add(userToFriend);
+        return role.save();
+ 
+    }).then(function() {
+        response.success("Success!");    
+    });
+});
+
+Parse.Cloud.afterSave(Parse.User, function(request, response) {
+    var user = request.object;
+    if (user.existed()) { return; }
+    var roleName = "friendsOf_" + user.id;
+    var friendRole = new Parse.Role(roleName, new Parse.ACL(user));
+    return friendRole.save().then(function(friendRole) {
+        var acl = new Parse.ACL();
+        acl.setReadAccess(friendRole, true);
+        acl.setReadAccess(user, true);
+        acl.setWriteAccess(user, true);
+        var friendData = new Parse.Object("FriendData", {
+          user: user,
+          ACL: acl,
+          profile: "my friend profile"
+        });
+        return friendData.save();
+    });
+});
+
