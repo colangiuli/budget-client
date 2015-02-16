@@ -2,7 +2,7 @@ angular.module('starter.controllers', [])
 
 
 .controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
-		$scope.dateFormat = 'dd/MM/yyyy HH:mm';
+		$scope.dateFormat = 'dd/MM/yyyy';
 	//first we have to login
 	Users.login();
 	
@@ -169,6 +169,7 @@ angular.module('starter.controllers', [])
 
 
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
+	$scope.dateFormat = 'dd/MM/yyyy';
 	  Expenses.get($stateParams.expenseId).success(function(data){
 				$scope.expense=data;
 				Categories.get(data.categoryID).success(function(data){
