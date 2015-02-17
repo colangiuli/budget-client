@@ -126,6 +126,9 @@ bottom: 4px !important;
   position: relative;
   /*width: 249px;*/
 }
+.ion-view {
+	background-color: beige;
+}
 
 .photo-mask {
   top: 0;

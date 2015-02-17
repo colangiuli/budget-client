@@ -2,7 +2,7 @@ angular.module('starter.controllers', [])
 
 
 .controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
-		$scope.dateFormat = 'dd/MM/yyyy';
+	$scope.dateFormat = 'dd/MM/yyyy';
 	//first we have to login
 	Users.login();
 	
@@ -16,40 +16,40 @@ angular.module('starter.controllers', [])
 		$scope.editExpenseModalPage = modal
 	})  
 
-  $scope.createNewExpense = function() {
-  	$scope.newExpense={};
-	$scope.newExpense.date = new Date();
-	$scope.newExpense.note = "--";
-	$scope.newExpense.categoryID = {
-		"__type": "Pointer",
-		"className":"categories",
-		"objectId": ""
-	};
-	$scope.newExpense.owner = {
-		"__type": "Pointer",
-		"className":"_User",
-		"objectId": $localstorage.get('objectId')
-	};
-	$scope.newExpense.value = 0;
-	$scope.fullString="000";
-	$scope.strDotted = "0,00";
-	$scope.show = "calc";
-	
-	Categories.getAll().success(function(data){
-		var tmpArray = data.results;
-		var elementXpage = 2;
-		$scope.allCategories = data.results;
-		$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
-		var outputArray = Array();
-		for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
-			outputArray.push(tmpArray.slice(idx, idx+elementXpage));
-		}
-		$scope.categories = outputArray;
-		$ionicSlideBoxDelegate.update();
-	});
-	
-    $scope.editExpenseModalPage.show();
-  }
+    $scope.createNewExpense = function() {
+		$scope.newExpense={};
+		$scope.newExpense.date = new Date();
+		$scope.newExpense.note = "--";
+		$scope.newExpense.categoryID = {
+			"__type": "Pointer",
+			"className":"categories",
+			"objectId": ""
+		};
+		$scope.newExpense.owner = {
+			"__type": "Pointer",
+			"className":"_User",
+			"objectId": $localstorage.get('objectId')
+		};
+		$scope.newExpense.value = 0;
+		$scope.fullString="000";
+		$scope.strDotted = "0,00";
+		$scope.show = "calc";
+		
+		Categories.getAll().success(function(data){
+			var tmpArray = data.results;
+			var elementXpage = 2;
+			$scope.allCategories = data.results;
+			$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
+			var outputArray = Array();
+			for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
+				outputArray.push(tmpArray.slice(idx, idx+elementXpage));
+			}
+			$scope.categories = outputArray;
+			$ionicSlideBoxDelegate.update();
+		});
+		
+		$scope.editExpenseModalPage.show();
+    }
   
     $scope.editExpense= function(expense) {
 		$scope.newExpense = expense;
@@ -87,19 +87,16 @@ angular.module('starter.controllers', [])
 		});
 		
 		$scope.editExpenseModalPage.show()
-  }
+    }
 
 
-  $scope.closeExpenseModalPage = function() {
-    $scope.editExpenseModalPage.hide();
-  };
+	$scope.closeExpenseModalPage = function() {
+		$scope.editExpenseModalPage.hide();
+	};
 
-  $scope.$on('$destroy', function() {
-    $scope.editExpenseModalPage.remove();
-  });	
-	
-
-  
+    $scope.$on('$destroy', function() {
+		$scope.editExpenseModalPage.remove();
+	});	
 
 	$scope.checkSelected = function(categoryToCheck){
         if($scope.newExpense.categoryID.objectId == categoryToCheck){
@@ -175,7 +172,7 @@ angular.module('starter.controllers', [])
 				Categories.get(data.categoryID).success(function(data){
 					$scope.category = data;
 				}); 
-	  }); 
+	}); 
 })
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
@@ -184,7 +181,7 @@ angular.module('starter.controllers', [])
         $scope.expenses=data.results;
     });
 	
-	  $scope.removeExpense=function(item){
+	$scope.removeExpense=function(item){
         Expenses.delete(item.objectId);
         $scope.expenses.splice($scope.expenses.indexOf(item),1);
     }
@@ -219,16 +216,26 @@ angular.module('starter.controllers', [])
 	Categories.get($stateParams.categoryId).success(function(data){
 		$scope.category = data;
 		$scope.category.budget = $scope.category.budget.toFixed(2);
-	  });
-	  Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
-	  	$scope.expenses = data.results;
-		var sum = 0;
-		for (var idx = 0;idx < data.results.length; idx++){
-			sum += parseFloat(data.results[idx].value);
-		}
-		$scope.used = 	sum.toFixed(2);
-	  });
-	  
+		
+		Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
+			$scope.expenses = data.results;
+			var sum = 0;
+			for (var idx = 0;idx < data.results.length; idx++){
+				sum += parseFloat(data.results[idx].value);
+			}
+			$scope.used = 	sum.toFixed(2);
+			budgetFlt = parseFloat($scope.category.budget);
+			if (sum > budgetFlt){
+				$scope.budgetColor = "assertive";
+			}else if(sum/budgetFlt > 0.8){
+				$scope.budgetColor = "energized";
+			}else{
+				$scope.budgetColor = "balanced";
+			}
+		});
+		
+	});
+	   
 	 $scope.removeExpense=function(item){
         Expenses.delete(item.objectId);
         $scope.expenses.splice($scope.expenses.indexOf(item),1);

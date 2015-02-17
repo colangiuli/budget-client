@@ -11,14 +11,23 @@ The Friends service returns an array of friend data
     </ion-nav-buttons>
   <ion-content class="padding">
 
-    <h3>Expenses: (usati {{used}} di {{category.budget}})</h3>
+    <h4 class="{{budgetColor}}"><center>usati {{used}} di {{category.budget}}</center></h4>
 
     <ion-list>
-      <ion-item class="item-remove-animate item-avatar  item-icon-right" ng-repeat="expense in expenses" type="item-text-wrap">
-        <img ng-src="{{expense.face}}">
-        <h2>{{expense.date | date:dateFormat}} - {{expense.note}}</h2>
-				    <span class="item-note">{{expense.value}} €</span> 
-
+					
+		<ion-item class="item item-icon-left item-complex" ng-repeat="expense in expenses">
+         <i class="icon {{category.icon}}"></i>
+        <div class="row">
+            <div class="col-67">
+                <h2>{{expense.owner.username}}:{{expense.note}}</h2>
+				<p>{{expense.date | date:dateFormat}}</p>
+            </div>
+            <div class="col-33" style="padding-top: 12px;vertical-align: middle;">
+				<h2 style="text-align: right;">{{expense.value}} €</h2>
+            </div>
+        </div>			
+					
+					
         <ion-option-button class="button-positive" ng-click="editExpense(expense)">
           Edit
         </ion-option-button>

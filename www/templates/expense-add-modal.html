@@ -19,7 +19,7 @@
 		<ion-slide-box pager-click="navSlide(index)" does-continue="true">
 			<ion-slide ng-repeat="item in categories">
 					<div class="row">
-					   <div class="col  button  button-icon" ng-repeat="category in item" ng-click="setCategory('{{ category.objectId }}')" ng-class="checkSelected(category.objectId)"><i class="icon ion-ionic"></i>{{ category.name }}</div>	
+					   <div class="col  button  button-icon" ng-repeat="category in item" ng-click="setCategory('{{ category.objectId }}')" ng-class="checkSelected(category.objectId)"><i class="icon {{ category.icon }}"></i></div>	
 					</div>
 			</ion-slide>
 		</ion-slide-box>
