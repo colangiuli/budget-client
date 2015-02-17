@@ -3,6 +3,7 @@ angular.module('starter.controllers', [])
 
 .controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
 	$scope.dateFormat = 'dd/MM/yyyy';
+	$scope.expenseModified=0;
 	//first we have to login
 	Users.login();
 	
@@ -16,8 +17,9 @@ angular.module('starter.controllers', [])
 		$scope.editExpenseModalPage = modal
 	})  
 
-    $scope.createNewExpense = function() {
+    $scope.createNewExpense = function(expenses) {
 		$scope.newExpense={};
+		$scope.expensePointer = expenses;
 		$scope.newExpense.date = new Date();
 		$scope.newExpense.note = "--";
 		$scope.newExpense.categoryID = {
@@ -52,8 +54,8 @@ angular.module('starter.controllers', [])
     }
   
     $scope.editExpense= function(expense) {
-		$scope.newExpense = expense;
-		$scope.strDotted = expense.value;
+		$scope.newExpense = angular.copy(expense);
+		$scope.strDotted = $scope.newExpense.value;
 		$scope.newExpense.date = new Date($scope.newExpense.date);
 	
 		leftString = parseInt(expense.value.substr(0,expense.value.length-3)).toString();
@@ -77,13 +79,24 @@ angular.module('starter.controllers', [])
 			var tmpArray = data.results;
 			var elementXpage = 2;
 			$scope.allCategories = data.results;
-			$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 			var outputArray = Array();
+			var pageTmp = 0;
+			$scope.pageToShow = 0;
+			var elementTmp = Array();
+			var idx2 = 0;
 			for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
-				outputArray.push(tmpArray.slice(idx, idx+elementXpage));
+				elementTmp = tmpArray.slice(idx, idx+elementXpage);
+				for (idx2 = 0; idx2 < elementTmp.length; idx2++){
+					if (elementTmp.objectId == $scope.newExpense.categoryID.objectId){
+						$scope.pageToShow = pageTmp;
+					}
+				}
+				pageTmp++;
+				outputArray.push(elementTmp);
 			}
 			$scope.categories = outputArray;
 			$ionicSlideBoxDelegate.update();
+			//$ionicSlideBoxDelegate.slide($scope.pageToShow, 500);
 		});
 		
 		$scope.editExpenseModalPage.show()
@@ -129,16 +142,18 @@ angular.module('starter.controllers', [])
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
 			   $scope.closeExpenseModalPage();
-			   Expenses.getAll().success(function(data){
+			  /* Expenses.getAll().success(function(data){
 				 $scope.expenses=data.results;
-			   });
+			   });*/
+			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
 			});
 		}else{
 			Expenses.create($scope.newExpense).success(function(data){
 			   $scope.closeExpenseModalPage();
-			   Expenses.getAll().success(function(data){
-				 $scope.expenses=data.results;
-			   });
+			  /* Expenses.getAll().success(function(data){
+				 $scope.expensePointer=data.results;
+			   });*/
+			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
 			});
 		}
 	}
@@ -177,6 +192,13 @@ angular.module('starter.controllers', [])
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
 
+	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		console.log("Updating ExpensesCtrl");
+		Expenses.getMine().success(function(data){
+			$scope.expenses=data.results;
+		});
+	});
+
 	Expenses.getMine().success(function(data){
         $scope.expenses=data.results;
     });
@@ -185,7 +207,7 @@ angular.module('starter.controllers', [])
         Expenses.delete(item.objectId);
         $scope.expenses.splice($scope.expenses.indexOf(item),1);
     }
-	
+
 })
 
 .controller('FriendsCtrl', function($scope, Friends) {
@@ -207,6 +229,14 @@ angular.module('starter.controllers', [])
 	Categories.getFull().success(function(data){
       $scope.categories=data.result;
   });
+  
+  	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		console.log("Updating CategoriesCtrl");
+		Categories.getFull().success(function(data){
+		  $scope.categories=data.result;
+		});
+	});
+  
 })
 
 .controller('CategoryDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
@@ -225,6 +255,28 @@ angular.module('starter.controllers', [])
 			}
 			$scope.used = 	sum.toFixed(2);
 			budgetFlt = parseFloat($scope.category.budget);
+			if (sum > budgetFlt){
+				$scope.budgetColor = "assertive";
+			}else if(sum/budgetFlt > 0.8){
+				$scope.budgetColor = "energized";
+			}else{
+				$scope.budgetColor = "balanced";
+			}
+		});
+		
+	});
+	
+	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		console.log("Updating CategoryDetailCtrl");
+		
+		Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
+			$scope.expenses = data.results;
+			var sum = 0;
+			for (var idx = 0;idx < data.results.length; idx++){
+				sum += parseFloat(data.results[idx].value);
+			}
+			$scope.used = 	sum.toFixed(2);
+			budgetFlt = (!!$scope.category && !!$scope.category.budget)?parseFloat($scope.category.budget):0;
 			if (sum > budgetFlt){
 				$scope.budgetColor = "assertive";
 			}else if(sum/budgetFlt > 0.8){

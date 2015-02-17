@@ -58,8 +58,10 @@
 	  </div>
 	  <div class="col detail-col" ng-show="show=='detail'">
 			<div class="row">
-				<span class="input-label">Description</span>
-			   <input type="text" placeholder="...." ng-model="newExpense.note">
+				<div class="col">
+					<span class="input-label">Description</span>
+					<input class="description-label" type="text" placeholder="...." ng-model="newExpense.note">
+				</div>	
 			</div>  
 	  </div>
 	  <div class="col tab-col col-25">

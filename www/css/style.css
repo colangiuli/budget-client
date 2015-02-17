@@ -2,6 +2,13 @@
   text-align:center !important;
 
 }
+
+.description-label{
+	background-color: cornflowerblue;
+width: 80%;
+padding: 10px;
+}
+
 .modal{
   top: 0 ;
   bottom: 0 ; 
@@ -138,4 +145,8 @@ bottom: 4px !important;
   height: 195px;
   width: 100%;
   background: radial-gradient(circle, transparent 81px, white 81px);
+}
+
+.backdrop {
+	background-color: rgba(121, 117, 117, 0.9) !important;
 }
