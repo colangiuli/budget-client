@@ -1,15 +1,11 @@
 <ion-view view-title="Account">
-  <ion-content>
-    <ion-list>
-      <ion-item class="item-toggle">
-        Enable Friends
-        <label class="toggle">
-          <input type="checkbox" ng-model="settings.enableFriends">
-          <div class="track">
-            <div class="handle"></div>
-          </div>
-        </label>
-      </ion-item>
-    </ion-list>
+  <ion-content class= "padding">
+	<center class= "padding">
+		<img ng-src="img/{{username}}.jpg" class="icon-image">
+		<h3>{{email}}</h3>
+		<button class="button button-assertive" ng-click="signOut()">
+		  sign-out
+		</button>
+	</center>
   </ion-content>
 </ion-view>

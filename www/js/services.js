@@ -20,6 +20,7 @@ angular.module('starter.services', [])
 /**
  * A simple example service that returns some data.
  */
+/*
 .factory('Friends', function() {
   // Might use a resource here that returns a JSON array
 
@@ -62,7 +63,7 @@ angular.module('starter.services', [])
     }
   }
 })
-
+*/
 .factory('Categories',['$http','PARSE_CREDENTIALS','$window',function($http,PARSE_CREDENTIALS,$window){
     return {
         getAll:function(){
@@ -235,24 +236,61 @@ angular.module('starter.services', [])
 
 .factory('Users',['$http','PARSE_CREDENTIALS','$window',function($http,PARSE_CREDENTIALS,$window){
     return {
-        login:function(){
-            $http.get('https://api.parse.com/1/login',{
+        login:function(user){
+            return $http.get('https://api.parse.com/1/login',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
                     'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-                },	params:  {"username":"Luca","password":"Luca!2013"}
-            }).
-			  success(function(data){
-				// this callback will be called asynchronously
-				// when the response is available
-				$window.localStorage['SESSION_TOKEN'] = data.sessionToken;
-				$window.localStorage['objectId'] = data.objectId;
-			  }).
-			  error(function() {
-				// called asynchronously if an error occurs
-				// or server returns response with an error status.
-			  });
-        }
+                },	params:  {"username":user.username,"password":user.password}
+            });
+        },
+
+		getFriendsRole:function(){
+			return $http.get('https://api.parse.com/1/roles',{
+				headers:{
+					'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+					'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
+				},
+				params:  { 
+					 where: {"name":"friendsOf_"+$window.localStorage['objectId']}
+				}
+			});
+		},
+		
+		
+		get:function(id){
+			return $http.get('https://api.parse.com/1/users/'+id,{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
+                },
+				params:  { 
+	                 //where: {"$relatedTo":{"object":{"__type":"Pointer","className":"_Role","objectId":$window.localStorage['FRIENDS_ROLE_ID']},"key":"users"}}
+	                 //limit: 2,
+	                 // count: 1
+					//'include': 'categoryID, owner'
+              }
+            });
+		},
+		
+		getFriends:function(){
+			return $http.get('https://api.parse.com/1/users',{
+                headers:{
+                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
+                },
+				params:  { 
+	                 where: {"$relatedTo":{"object":{"__type":"Pointer","className":"_Role","objectId":$window.localStorage['FRIENDS_ROLE_ID']},"key":"users"}}
+	                 //limit: 2,
+	                 // count: 1
+					//'include': 'categoryID, owner'
+              }
+            });
+		}
+		
     }
 }]).value('PARSE_CREDENTIALS',{
     APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",

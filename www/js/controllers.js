@@ -1,11 +1,37 @@
 angular.module('starter.controllers', [])
 
+.controller('SignInCtrl', function($scope, $state, Users, $window, $http) {
+	$scope.user = {"username": $window.localStorage['username']};
+	$scope.signIn = function(user) {
+		Users.login(user).
+				success(function(data){
+					// this callback will be called asynchronously
+					// when the response is available
+					$window.localStorage['SESSION_TOKEN'] = data.sessionToken;
+					$window.localStorage['objectId'] = data.objectId;
+					$window.localStorage['username'] = data.username;
+					$window.localStorage['icon'] = data.icon;
+					$window.localStorage['email'] = data.email;
+					$state.go('tab.categories');
+					Users.getFriendsRole().success(function(data){
+						// this callback will be called asynchronously
+						// when the response is available
+						$window.localStorage['FRIENDS_ROLE_ID'] = data.results[0].objectId;
+					});
+				}).error(function() {
+					alert("login error!");
+				});
+    };
+  
+  
+})
+
 
 .controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
 	$scope.dateFormat = 'dd/MM/yyyy';
 	$scope.expenseModified=0;
 	//first we have to login
-	Users.login();
+	//Users.login();
 	
 ///////////////////////////////////////////////////////
 /////////      new expense handling
@@ -17,15 +43,15 @@ angular.module('starter.controllers', [])
 		$scope.editExpenseModalPage = modal
 	})  
 
-    $scope.createNewExpense = function(expenses) {
+    $scope.createNewExpense = function(catID) {
 		$scope.newExpense={};
-		$scope.expensePointer = expenses;
+
 		$scope.newExpense.date = new Date();
-		$scope.newExpense.note = "--";
+		
 		$scope.newExpense.categoryID = {
 			"__type": "Pointer",
 			"className":"categories",
-			"objectId": ""
+			"objectId": catID?catID:""
 		};
 		$scope.newExpense.owner = {
 			"__type": "Pointer",
@@ -41,7 +67,9 @@ angular.module('starter.controllers', [])
 			var tmpArray = data.results;
 			var elementXpage = 2;
 			$scope.allCategories = data.results;
-			$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
+			if(!catID){
+				$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
+			}
 			var outputArray = Array();
 			for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
 				outputArray.push(tmpArray.slice(idx, idx+elementXpage));
@@ -142,17 +170,11 @@ angular.module('starter.controllers', [])
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
 			   $scope.closeExpenseModalPage();
-			  /* Expenses.getAll().success(function(data){
-				 $scope.expenses=data.results;
-			   });*/
 			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
 			});
 		}else{
 			Expenses.create($scope.newExpense).success(function(data){
 			   $scope.closeExpenseModalPage();
-			  /* Expenses.getAll().success(function(data){
-				 $scope.expensePointer=data.results;
-			   });*/
 			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
 			});
 		}
@@ -217,12 +239,16 @@ angular.module('starter.controllers', [])
 .controller('FriendDetailCtrl', function($scope, $stateParams, Friends) {
   $scope.friend = Friends.get($stateParams.friendId);
 })
-.controller('FriendsCtrl', function($scope, Friends) {
-  $scope.friends = Friends.all();
+.controller('FriendsCtrl', function($scope, Users) {
+	Users.getFriends().success(function(data){
+	  $scope.friends = data.results;
+	});
 })
 
-.controller('FriendDetailCtrl', function($scope, $stateParams, Friends) {
-  $scope.friend = Friends.get($stateParams.friendId);
+.controller('FriendDetailCtrl', function($scope, $stateParams, Users) {
+	Users.get($stateParams.friendId).success(function(data){
+	  $scope.friend  = data;
+	});
 })
 
 .controller('CategoriesCtrl', function($scope, Categories) {
@@ -295,8 +321,14 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('AccountCtrl', function($scope) {
+.controller('AccountCtrl', function($scope, $state, $localstorage) {
   $scope.settings = {
     enableFriends: true
   };
+  $scope.username =  $localstorage.get('username');
+  $scope.email =  $localstorage.get('email');
+  
+  $scope.signOut= function() {
+		$state.go('signin');
+	};
 });

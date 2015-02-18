@@ -52,15 +52,21 @@
 	  </div>
 	  <div class="col calendar-col" ng-show="show=='calendar'">
 			<div class="row">
-			  	<span class="input-label">Date</span>
-				<input type="date" ng-model="newExpense.date">
+				<div class="col full-height">
+					<center>
+					<span class="input-label myInputLabel">Date</span>
+					<input class="myInput" type="date" ng-model="newExpense.date">
+					</center>
+				</div>	
 			</div>  
 	  </div>
 	  <div class="col detail-col" ng-show="show=='detail'">
 			<div class="row">
-				<div class="col">
-					<span class="input-label">Description</span>
-					<input class="description-label" type="text" placeholder="...." ng-model="newExpense.note">
+				<div class="col full-height">
+					<center>
+					<span class="input-label myInputLabel">Description</span>
+					<input class="myInput" type="text" placeholder="Exp. Description" ng-model="newExpense.note">
+					</center>
 				</div>	
 			</div>  
 	  </div>
