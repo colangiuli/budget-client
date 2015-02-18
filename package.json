@@ -1,7 +1,7 @@
 {
-  "name": "mytabsapp",
+  "name": "myBudget",
   "version": "1.0.0",
-  "description": "myTabsApp: An Ionic project",
+  "description": "myBudget: Un progetto di Luca & Laura",
   "dependencies": {
     "gulp": "^3.5.6",
     "gulp-sass": "^0.7.1",
