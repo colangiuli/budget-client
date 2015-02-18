@@ -141,6 +141,7 @@ angular.module('starter.services', [])
                 },
 				params:  { 
 		            //where: whereQuery,
+					order: '-date',
 		            //limit: 2,
 		            // count: 1
 			   		'include': 'categoryID, owner'
@@ -157,6 +158,7 @@ angular.module('starter.services', [])
                 },
 				params:  { 
 		            where: {"owner":{"__type":"Pointer","className":"_User","objectId":$window.localStorage['objectId']}},
+					order: '-date',
 		            //limit: 2,
 		            // count: 1
 			   		'include': 'categoryID'
@@ -173,6 +175,7 @@ angular.module('starter.services', [])
                 },
 				params:  { 
 		            where: {"categoryID":{"__type":"Pointer","className":"categories","objectId":categoryId}},
+					order: '-date',
 		            //limit: 2,
 		            // count: 1
 			   		'include': 'owner'
