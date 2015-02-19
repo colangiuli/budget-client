@@ -2,6 +2,10 @@ angular.module('starter.controllers', [])
 
 .controller('SignInCtrl', function($scope, $state, Users, $window, $http) {
 	$scope.user = {"username": $window.localStorage['username']};
+	if ((!!$window.localStorage['SESSION_TOKEN']) && ($window.localStorage['SESSION_TOKEN'] !="") ){
+		$state.go('tab.categories');
+	}
+	
 	$scope.signIn = function(user) {
 		Users.login(user).
 				success(function(data){
@@ -12,6 +16,7 @@ angular.module('starter.controllers', [])
 					$window.localStorage['username'] = data.username;
 					$window.localStorage['icon'] = data.icon;
 					$window.localStorage['email'] = data.email;
+					$window.localStorage['img'] = data.img;
 					$state.go('tab.categories');
 					Users.getFriendsRole().success(function(data){
 						// this callback will be called asynchronously
@@ -75,10 +80,11 @@ angular.module('starter.controllers', [])
 				outputArray.push(tmpArray.slice(idx, idx+elementXpage));
 			}
 			$scope.categories = outputArray;
+			$scope.editExpenseModalPage.show();
 			$ionicSlideBoxDelegate.update();
 		});
 		
-		$scope.editExpenseModalPage.show();
+		
     }
   
     $scope.editExpense= function(expense) {
@@ -124,10 +130,9 @@ angular.module('starter.controllers', [])
 			}
 			$scope.categories = outputArray;
 			$ionicSlideBoxDelegate.update();
+			$scope.editExpenseModalPage.show();
 			//$ionicSlideBoxDelegate.slide($scope.pageToShow, 500);
 		});
-		
-		$scope.editExpenseModalPage.show()
     }
 
 
@@ -166,7 +171,6 @@ angular.module('starter.controllers', [])
 		if (selectedCat.shared == true){
 			$scope.newExpense.ACL["role:friendsOf_" + $localstorage.get('objectId')] = { "read": true};
 		}
-		//{ $localstorage.get('objectId'): { "read": true, "write": true}};		
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
 			   $scope.closeExpenseModalPage();
@@ -203,13 +207,18 @@ angular.module('starter.controllers', [])
 
 
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
-	$scope.dateFormat = 'dd/MM/yyyy';
-	  Expenses.get($stateParams.expenseId).success(function(data){
+	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		console.log("Updating ExpenseDetailCtrl");
+		Expenses.get($stateParams.expenseId).success(function(data){
 				$scope.expense=data;
-				Categories.get(data.categoryID).success(function(data){
-					$scope.category = data;
-				}); 
-	}); 
+				$scope.category = data.categoryID;
+	    }); 
+	});
+	$scope.dateFormat = 'dd/MM/yyyy';
+		Expenses.get($stateParams.expenseId).success(function(data){
+				$scope.expense=data;
+				$scope.category = data.categoryID;
+	    }); 
 })
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
@@ -232,13 +241,6 @@ angular.module('starter.controllers', [])
 
 })
 
-.controller('FriendsCtrl', function($scope, Friends) {
-  $scope.friends = Friends.all();
-})
-
-.controller('FriendDetailCtrl', function($scope, $stateParams, Friends) {
-  $scope.friend = Friends.get($stateParams.friendId);
-})
 .controller('FriendsCtrl', function($scope, Users) {
 	Users.getFriends().success(function(data){
 	  $scope.friends = data.results;
@@ -322,13 +324,11 @@ angular.module('starter.controllers', [])
 
 
 .controller('AccountCtrl', function($scope, $state, $localstorage) {
-  $scope.settings = {
-    enableFriends: true
-  };
   $scope.username =  $localstorage.get('username');
   $scope.email =  $localstorage.get('email');
-  
+  $scope.img =  $localstorage.get('img');
   $scope.signOut= function() {
+		$localstorage.set('SESSION_TOKEN',"");
 		$state.go('signin');
 	};
 });

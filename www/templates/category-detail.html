@@ -17,7 +17,7 @@ The Friends service returns an array of friend data
 	</center>
     <ion-list>		
 		<ion-item class="item item-avatar item-complex" ng-repeat="expense in expenses">
-        <img ng-src="img/{{expense.owner.username}}.jpg" class="icon-image">
+        <img ng-src="{{expense.owner.img}}" class="icon-image">
         <div class="row">
             <div class="col-67">
                 <h2>{{expense.note}}</h2>

@@ -50,11 +50,13 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   // Each state's controller can be found in controllers.js
   $stateProvider
     .state('signin', {
+	  cache: false,
       url: '/sign-in',
       templateUrl: 'templates/sign-in.html',
       controller: 'SignInCtrl'
     })
     .state('forgotpassword', {
+	  cache: false,
       url: '/forgot-password',
       templateUrl: 'templates/forgot-password.html'
     })
