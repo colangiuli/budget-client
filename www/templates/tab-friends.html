@@ -2,7 +2,7 @@
   <ion-content>
     <ion-list>
       <ion-item class="item-avatar" ng-repeat="friend in friends" type="item-text-wrap" href="#/tab/friend/{{friend.objectId}}">
-        <img ng-src="img/{{friend.username}}.jpg">
+        <img ng-src="{{friend.img}}">
         <h2>{{friend.username}}</h2>
 		<p>{{friend.email}}</p>
       </ion-item>
