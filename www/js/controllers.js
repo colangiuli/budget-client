@@ -221,7 +221,7 @@ angular.module('starter.controllers', [])
 	    }); 
 })
 
-.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
+.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, ExpensesLocal, Categories, $state, $ionicSlideBoxDelegate) {
 
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
 		console.log("Updating ExpensesCtrl");
@@ -229,7 +229,7 @@ angular.module('starter.controllers', [])
 			$scope.expenses=data.results;
 		});
 	});
-
+	ExpensesLocal.sync();
 	Expenses.getMine().success(function(data){
         $scope.expenses=data.results;
     });

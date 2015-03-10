@@ -7,7 +7,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
 
-.run(function($ionicPlatform, $rootScope, $ionicLoading) {
+.run(function($ionicPlatform, $rootScope, $ionicLoading,DB) {
   $rootScope.$on('loading:show', function() {
     $ionicLoading.show({template: 'Loading...',duration: 3000});
   })
@@ -26,6 +26,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
+	DB.init();
     //intialize parse
     //Parse.initialize("WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt", "iuRiAFBNVw7aCA7tHQRszUsgjXhnHiDubag4ZCRn");
   });
@@ -138,4 +139,36 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   // if none of the above states are matched, use this as the fallback
   $urlRouterProvider.otherwise('/sign-in');
 
+})
+.constant('DB_CONFIG', {
+    name: 'myBudget',
+    tables: [
+      {
+            name: 'expense',
+            columns: [
+                {name: 'objectId', type: 'text primary key'},
+                {name: 'categoryId', type: 'text'},
+                {name: 'date', type: 'text'},
+				{name: 'note', type: 'text'},
+                {name: 'photo', type: 'text'},
+                {name: 'value', type: 'text'},
+                {name: 'createdAt', type: 'text'},
+                {name: 'updatedAt', type: 'text'},
+                {name: 'owner', type: 'text'}
+            ]
+        },
+		{
+            name: 'categories',
+            columns: [
+                {name: 'objectId', type: 'text primary key'},
+                {name: 'budget', type: 'text'},
+                {name: 'icon', type: 'text'},
+				{name: 'name', type: 'text'},
+                {name: 'shared', type: 'text'},
+                {name: 'createdAt', type: 'text'},
+                {name: 'updatedAt', type: 'text'},
+                {name: 'owner', type: 'text'}
+            ]
+        }
+    ]
 });
