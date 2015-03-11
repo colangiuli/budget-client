@@ -224,6 +224,7 @@ angular.module('starter.controllers', [])
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, ExpensesLocal, Categories, $state, $ionicSlideBoxDelegate) {
 
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		ExpensesLocal.remoteSync();
 		console.log("Updating ExpensesCtrl");
 		Expenses.getMine().success(function(data){
 			$scope.expenses=data.results;

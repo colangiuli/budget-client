@@ -353,6 +353,9 @@ angular.module('starter.services', [])
 
 
         self.remoteSync = function(){
+            if (self.syncing == 1)
+                return;
+
 			self.syncing = 1;
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
@@ -368,7 +371,7 @@ angular.module('starter.services', [])
 			   		//'include': 'categoryID, owner'
 	            }
             }).success(function(data){
-				var queryD = "delete from expense where objectId = 'zak7kOQo4L'";
+				var queryD = "delete from expense where objectId = '?'";
 				var queryI = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner) values (?,?,?,?,?,?,?,?,?)"
 				if (!!data.results)
 					data = data.results;
@@ -382,10 +385,9 @@ angular.module('starter.services', [])
 				DB.db.transaction(
 					function(transaction) {
 						for (var i=0; i<bindingsArray.length; i++){ 
-							transaction.executeSql(queryD, [], function(transaction, result) {
-								console.log (bindingsArray[i]);
-								transaction.executeSql(queryI, bindingsArray[i]);
-							});
+                            queryD = "delete from expense where objectId = '" + bindingsArray[i][0] + "'";
+                            console.log(queryD);
+							transaction.executeSql(queryD);
 						};
 					},
 					function(error){
@@ -393,10 +395,24 @@ angular.module('starter.services', [])
 						console.log(error);
 					},
 					function(){
-						var d = new Date();
-						self.lastSync = d.toISOString();
-						console.log("successfully synced at " + self.lastSync);
-						self.syncing = 0;
+                        DB.db.transaction(
+                            function(innertransaction) {
+                                for (var idx=0; idx<bindingsArray.length; idx++){ 
+                                    innertransaction.executeSql(queryI, bindingsArray[idx]);
+                                };
+                            },
+                            function(error){
+                                self.syncing = 0;
+                                console.log(error);
+                            },
+                            function(){
+                                var d = new Date();
+                                self.lastSync = d.toISOString();
+                                console.log("successfully synced at " + self.lastSync);
+                                self.syncing = 0;
+                            }
+                        )
+
 					}
 				);
 				
@@ -421,19 +437,8 @@ angular.module('starter.services', [])
 			});
         };
         self.getAll = function(){
-            return $http.get('https://api.parse.com/1/classes/expenses',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-		            //where: whereQuery,
-					order: '-date',
-		            //limit: 2,
-		            // count: 1
-			   		//'include': 'categoryID, owner'
-	            }
+            return DB.query("SELECT * FROM expenses").then(function(result){
+                return DB.fetchAll(result);
             });
         };		
         self.getMine = function(){
@@ -443,35 +448,14 @@ angular.module('starter.services', [])
         };		
 		
         self.getAllByCatId = function(categoryId){
-            return $http.get('https://api.parse.com/1/classes/expenses',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-		            where: {"categoryID":{"__type":"Pointer","className":"categories","objectId":categoryId}},
-					order: '-date',
-		            //limit: 2,
-		            // count: 1
-			   		'include': 'owner'
-	            }
+            return DB.query("SELECT * FROM expenses where categoryID = '" + categoryId + "'").then(function(result){
+                return DB.fetchAll(result);
             });
         };
 
         self.get = function(id){
-            return $http.get('https://api.parse.com/1/classes/expenses/'+id,{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-	                 //where: whereQuery,
-	                 //limit: 2,
-	                 // count: 1
-					'include': 'categoryID, owner'
-              }
+            return DB.query("SELECT * FROM expenses where objectId = '" + id + "'").then(function(result){
+                return DB.fetchAll(result);
             });
         };
         self.create = function(data){
