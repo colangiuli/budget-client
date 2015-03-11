@@ -154,7 +154,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
                 {name: 'value', type: 'text'},
                 {name: 'createdAt', type: 'text'},
                 {name: 'updatedAt', type: 'text'},
-                {name: 'owner', type: 'text'}
+                {name: 'owner', type: 'text'},
+                {name: 'status', type: 'text'}
             ]
         },
 		{
@@ -167,7 +168,8 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
                 {name: 'shared', type: 'text'},
                 {name: 'createdAt', type: 'text'},
                 {name: 'updatedAt', type: 'text'},
-                {name: 'owner', type: 'text'}
+                {name: 'owner', type: 'text'},
+                {name: 'status', type: 'text'}
             ]
         }
     ]

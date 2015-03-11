@@ -252,7 +252,9 @@ angular.module('starter.services', [])
 }]).value('PARSE_CREDENTIALS',{
     APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
     REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
-}).factory('DB', function($q, DB_CONFIG) {
+})
+
+.factory('DB', function($q, DB_CONFIG) {
     var self = this;
     self.db = null;
  
@@ -285,6 +287,26 @@ angular.module('starter.services', [])
             });
         });
  
+        return deferred.promise;
+    };
+	
+	self.insert = function(query, bindingsArray) {
+        bindingsArray = typeof bindingsArray !== 'undefined' ? bindingsArray : [];
+        var deferred = $q.defer();
+ 
+        self.db.transaction(
+			function(transaction) {
+				for (var i=0; i<bindingsArray.length; i++){  
+					transaction.executeSql(query, bindingsArray[i]);
+				};
+			},
+			function(error){
+				console.log(error);
+			},
+			function(){
+				console.log("transaction ok")
+			}
+		);
         return deferred.promise;
     };
  
@@ -325,8 +347,13 @@ angular.module('starter.services', [])
     return self;
 })
 .factory('ExpensesLocal',['$http','PARSE_CREDENTIALS','$window','DB',function($http,PARSE_CREDENTIALS,$window,DB){
-    return {
-        sync:function(){
+	var self = this;
+    self.lastSync = '2013-03-07T11:35:46.622Z';
+	self.syncing = 0;
+
+
+        self.remoteSync = function(){
+			self.syncing = 1;
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -334,23 +361,66 @@ angular.module('starter.services', [])
 					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 },
 				params:  { 
-		            //where: whereQuery,
+		            where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + self.lastSync + '"}}}',
 					order: '-date',
 		            //limit: 2,
 		            // count: 1
 			   		//'include': 'categoryID, owner'
 	            }
             }).success(function(data){
-				var query = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner) values "
-				data = data.results;
+				var queryD = "delete from expense where objectId = 'zak7kOQo4L'";
+				var queryI = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner) values (?,?,?,?,?,?,?,?,?)"
+				if (!!data.results)
+					data = data.results;
+				var tmpData = [];
 				for(var idx = 0; idx < data.length; idx++){
-					query += "('" + data[idx].objectId + "','" + data[idx].categoryID.objectId + "','" + data[idx].date  + data[idx].note + "','" + data[idx].photo + data[idx].value + "','" + data[idx].createdAt  + data[idx].owner.objectId + "'), ";
+					tmpData.push([data[idx].objectId, data[idx].categoryID.objectId, data[idx].date, data[idx].note, data[idx].photo, data[idx].value, data[idx].createdAt, data[idx].updatedAt, data[idx].owner.objectId]);
 				}
-				query = query.substr(0,query.length-1);
-				return DB.query(query);
+				
+				bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
+		 
+				DB.db.transaction(
+					function(transaction) {
+						for (var i=0; i<bindingsArray.length; i++){ 
+							transaction.executeSql(queryD, [], function(transaction, result) {
+								console.log (bindingsArray[i]);
+								transaction.executeSql(queryI, bindingsArray[i]);
+							});
+						};
+					},
+					function(error){
+						self.syncing = 0;
+						console.log(error);
+					},
+					function(){
+						var d = new Date();
+						self.lastSync = d.toISOString();
+						console.log("successfully synced at " + self.lastSync);
+						self.syncing = 0;
+					}
+				);
+				
+				
+				
+				
+				
+				/*DB.insert(query,tmpData).then(function(result){
+					//return DB.fetchAll(result);
+					var d = new Date();
+					self.lastSync = d.toISOString();
+					console.log("successfully synced at " + self.lastSync);
+				});
+				for(var idx = 0; idx < data.length; idx++){
+					query += "('" + data[idx].objectId + "','" + data[idx].categoryID.objectId + "','" + data[idx].date + "','"  + data[idx].note + "','" + data[idx].photo + "','" + data[idx].value + "','" + data[idx].createdAt + "','" + data[idx].updatedAt  + "','" + data[idx].owner.objectId + "'), ";
+				}
+				query = query.substr(0,query.length-2);
+				return DB.query(query).then(function(result){
+					//return DB.fetchAll(result);
+					console.log(result);
+				});*/
 			});
-        },
-        getAll:function(){
+        };
+        self.getAll = function(){
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -365,14 +435,14 @@ angular.module('starter.services', [])
 			   		//'include': 'categoryID, owner'
 	            }
             });
-        },		
-        getMine:function(){
+        };		
+        self.getMine = function(){
             return DB.query("SELECT * FROM expenses where owner = '" + $window.localStorage['objectId'] + "'").then(function(result){
 				return DB.fetchAll(result);
 			});
-        },		
+        };		
 		
-        getAllByCatId:function(categoryId){
+        self.getAllByCatId = function(categoryId){
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -387,9 +457,9 @@ angular.module('starter.services', [])
 			   		'include': 'owner'
 	            }
             });
-        },
+        };
 
-        get:function(id){
+        self.get = function(id){
             return $http.get('https://api.parse.com/1/classes/expenses/'+id,{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -403,8 +473,8 @@ angular.module('starter.services', [])
 					'include': 'categoryID, owner'
               }
             });
-        },
-        create:function(data){
+        };
+        self.create = function(data){
             return $http.post('https://api.parse.com/1/classes/expenses',data,{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -413,8 +483,8 @@ angular.module('starter.services', [])
                     'Content-Type':'application/json'
                 }
             });
-        },
-        edit:function(id,data){
+        };
+        self.edit = function(id,data){
             return $http.put('https://api.parse.com/1/classes/expenses/'+id,data,{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -423,8 +493,8 @@ angular.module('starter.services', [])
                     'Content-Type':'application/json'
                 }
             });
-        },
-        delete:function(id){
+        };
+        self.delete = function(id){
             return $http.delete('https://api.parse.com/1/classes/expenses/'+id,{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -433,8 +503,10 @@ angular.module('starter.services', [])
                     'Content-Type':'application/json'
                 }
             });
-        }
-    }
+        };
+		
+		return self;
+    
 }]).value('PARSE_CREDENTIALS',{
     APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
     REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"

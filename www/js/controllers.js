@@ -229,7 +229,7 @@ angular.module('starter.controllers', [])
 			$scope.expenses=data.results;
 		});
 	});
-	ExpensesLocal.sync();
+	ExpensesLocal.remoteSync();
 	Expenses.getMine().success(function(data){
         $scope.expenses=data.results;
     });
