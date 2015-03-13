@@ -26,10 +26,15 @@ angular.module('starter.services', [])
 
 
         self.remoteSync = function(){
-            if (self.syncing == 1)
+            console.log("entering categories remote Sync");
+            if (self.syncing == 1){
+                console.log("already syncing categories: exiting..");
                 return;
+            }
 
             self.syncing = 1;
+            console.log("getting data from remote");
+            console.log("cat sync 1");
             return $http.get('https://api.parse.com/1/classes/categories',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -44,6 +49,7 @@ angular.module('starter.services', [])
                     //'include': 'categoryID, owner'
                 }
             }).success(function(data){
+                console.log("cat: received data from remote");
                 var queryD = "delete from categories where objectId = '?'";
                 var queryI = "insert into categories (objectId,budget,icon,name,shared,createdAt,updatedAt,status,deleted) values (?,?,?,?,?,?,?,'S',?)";
                 if (!!data.results)
@@ -65,6 +71,7 @@ angular.module('starter.services', [])
                     },
                     function(error){
                         self.syncing = 0;
+                        console.log("cat sync 0");
                         console.log(error);
                     },
                     function(){
@@ -76,6 +83,7 @@ angular.module('starter.services', [])
                             },
                             function(error){
                                 self.syncing = 0;
+                                console.log("cat sync 0");
                                 console.log("error inserting cqategories:");
                                 console.log(error);
                             },
@@ -83,6 +91,7 @@ angular.module('starter.services', [])
                                 var d = new Date();
                                 self.lastSync = d.toISOString();
                                 console.log("successfully synced Categories at " + self.lastSync);
+                                console.log("cat sync 0");
                                 self.syncing = 0;
                             }
                         )
@@ -92,6 +101,7 @@ angular.module('starter.services', [])
 
             }).error(function() {
                 console.log("error fetching category data from remote");
+                console.log("cat sync 0");
                 self.syncing = 0;
             });
         };
@@ -156,112 +166,6 @@ angular.module('starter.services', [])
 }]).value('PARSE_CREDENTIALS',{
     APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
     REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
-})
-
-
-.factory('ExpensesOld',['$http','PARSE_CREDENTIALS','$window',function($http,PARSE_CREDENTIALS,$window){
-    return {
-        getAll:function(){
-            return $http.get('https://api.parse.com/1/classes/expenses',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-		            //where: whereQuery,
-					order: '-date',
-		            //limit: 2,
-		            // count: 1
-			   		'include': 'categoryID, owner'
-	            }
-            });
-        },
-		
-        getMine:function(){
-            return $http.get('https://api.parse.com/1/classes/expenses',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-		            where: {"owner":{"__type":"Pointer","className":"_User","objectId":$window.localStorage['objectId']}},
-					order: '-date',
-		            //limit: 2,
-		            // count: 1
-			   		'include': 'categoryID'
-	            }
-            });
-        },		
-		
-        getAllByCatId:function(categoryId){
-            return $http.get('https://api.parse.com/1/classes/expenses',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-		            where: {"categoryID":{"__type":"Pointer","className":"categories","objectId":categoryId}},
-					order: '-date',
-		            //limit: 2,
-		            // count: 1
-			   		'include': 'owner'
-	            }
-            });
-        },
-
-        get:function(id){
-            return $http.get('https://api.parse.com/1/classes/expenses/'+id,{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-	                 //where: whereQuery,
-	                 //limit: 2,
-	                 // count: 1
-					'include': 'categoryID, owner'
-              }
-            });
-        },
-        create:function(data){
-            return $http.post('https://api.parse.com/1/classes/expenses',data,{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
-                    'Content-Type':'application/json'
-                }
-            });
-        },
-        edit:function(id,data){
-            return $http.put('https://api.parse.com/1/classes/expenses/'+id,data,{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
-                    'Content-Type':'application/json'
-                }
-            });
-        },
-        delete:function(id){
-            return $http.delete('https://api.parse.com/1/classes/expenses/'+id,{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
-                    'Content-Type':'application/json'
-                }
-            });
-        }
-    }
-}]).value('PARSE_CREDENTIALS',{
-    APP_ID: "WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt",
-    REST_API_KEY:"ZKeAoTzFyB7pa5Ar0PLhMrQXK3ynqw1ThXOh5Zzn"
-
 })
 
 
@@ -430,16 +334,24 @@ angular.module('starter.services', [])
 
 
         self.localSync = function(){
+
+            console.log("exp: entering localSync");
             if(self.syncing != 0){
+                console.log("exp: already syncing - exityng localsync current state: " + self.syncing);
                 return;
             }else{
                 self.syncing = 1;
+                console.log("exp: sync 1");
             }
+            console.log("exp: getting modified local data");
             DB.query("SELECT * FROM expense where status != 'S'").then(function(result){
                 if (result.rows.length == 0){
+                   console.log("exp: no more local data to sync");
+                   console.log("exp sync 2");
                    self.syncing = 2;
                    return; 
                 }
+                console.log("exp: " + result.rows.length + " rows to sync");
                 var riga = result.rows.item(0);
                 var newExpense = {};
                 newExpense.date = riga.date;
@@ -468,7 +380,7 @@ angular.module('starter.services', [])
                     "objectId": $window.localStorage['objectId']
                 };
 
-
+                console.log (newExpense);
                 if(riga.objectId.substr(0,4) == "FAKE"){
                     $http.post('https://api.parse.com/1/classes/expenses',newExpense,{
                         headers:{
@@ -482,6 +394,8 @@ angular.module('starter.services', [])
                              "update expense set status = 'S', objectId = ? where objectId = ?",
                             [data.objectId, riga.objectId]
                             ).then(function(result){
+                                console.log("exp: " + riga.objectId + " synced. now it is: " + data.objectId);
+                                console.log("exp: sync 0");
                                 self.syncing = 0;
                                 self.localSync();
                                 return;
@@ -505,6 +419,8 @@ angular.module('starter.services', [])
                              "update expense set status = 'S' where objectId = ?",
                             [riga.objectId]
                             ).then(function(result){
+                                console.log("exp: " + riga.objectId + " synced");
+                                console.log("exp: sync 0");
                                 self.syncing = 0;
                                 self.localSync();
                                 return;
@@ -520,12 +436,15 @@ angular.module('starter.services', [])
         }
 
         self.remoteSync = function(){
+            console.log("exp Rem: entering remote sync");
             if (self.syncing != 2){
+                console.log("exp Rem: status not = 2, it is " + self.syncing + " exiting");
                 return;
             }else{
+                console.log("exp Rem: sync 3");
     			self.syncing = 3;
             }
-
+            console.log("exp Rem: getting remote data");
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -540,6 +459,7 @@ angular.module('starter.services', [])
 			   		'include': 'owner'
 	            }
             }).success(function(data){
+                console.log("exp Rem: succesfully received remote data");
 				var queryD = "delete from expense where objectId = '?'";
 				var queryI = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'S',?)"
 				if (!!data.results)
@@ -551,7 +471,7 @@ angular.module('starter.services', [])
 
 
 				var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
-		 
+		        console.log("exp Rem: deleting local data");
 				DB.db.transaction(
 					function(transaction) {
 						for (var i=0; i<bindingsArray.length; i++){ 
@@ -561,10 +481,13 @@ angular.module('starter.services', [])
 						};
 					},
 					function(error){
+                        console.log("exp Rem: error deleting local data");
+                        console.log("exp Rem: sync 0");
 						self.syncing = 0;
 						console.log(error);
 					},
 					function(){
+                        console.log("exp Rem: inserting remote data in db");
                         DB.db.transaction(
                             function(innertransaction) {
                                 for (var idx=0; idx<bindingsArray.length; idx++){ 
@@ -572,14 +495,17 @@ angular.module('starter.services', [])
                                 };
                             },
                             function(error){
+                                console.log("exp Rem: error inserting data in local db");
+                                console.log("exp Rem: sync 0");
                                 self.syncing = 0;
-                                console.log("error inserting expenses");
                                 console.log(error);
                             },
                             function(){
                                 var d = new Date();
                                 self.lastSync = d.toISOString();
-                                console.log("successfully synced expenses at " + self.lastSync);
+                                console.log("exp Rem: error deleting local data");
+                                console.log("exp Rem: sync 0");
+                                console.log("exp Rem: successfully synced expenses at " + self.lastSync);
                                 self.syncing = 0;
                             }
                         )
@@ -587,7 +513,8 @@ angular.module('starter.services', [])
 					}
 				);
 			}).error(function() {
-                console.log("error fetching expense data from remote");
+                console.log("exp Rem: error fetching expense data from remote");
+                console.log("exp Rem: sync 0");
                 self.syncing = 0;
             });
         };
@@ -614,13 +541,16 @@ angular.module('starter.services', [])
             });
         };
         self.create = function(data){
-
+            console.log("Create: sync 0");
+            self.syncing = 0;
             var d = new Date();
             var tmpDate = d.toISOString();
             return DB.query(
                  "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'N','0')",
                 ["FAKE_" + Date.now().toString() , data.categoryID_objectId, data.date.toISOString(), data.note, data.photo, data.value, tmpDate, tmpDate, $window.localStorage['objectId'], $window.localStorage['img'], $window.localStorage['username'], $window.localStorage['email']]
                 ).then(function(result){
+                console.log("Delete: OK sync 0");
+                self.syncing = 0;     
                 return DB.fetchAll(result);
             });
 
@@ -636,10 +566,14 @@ angular.module('starter.services', [])
              */
         };
         self.edit = function(id,data){
+            console.log("Edit: sync 0");
+            self.syncing = 0;
             return DB.query(
                  'update expense set categoryId = ?, date = ?, note = ?, photo = ?, value = ?, createdAt = ?, updatedAt = ?, status = "M" where objectId = ?',
                 [data.categoryID.objectId, data.date.toISOString(), data.note, data.photo, data.value, data.createdAt, data.updatedAt, id]
                 ).then(function(result){
+                console.log("Edit: OK sync 0");
+                self.syncing = 0;    
                 return DB.fetchAll(result);
             });
 
@@ -656,10 +590,14 @@ angular.module('starter.services', [])
 */
         };
         self.delete = function(id){
+            console.log("Delete: sync 0");
+            self.syncing = 0; 
             return DB.query(
                  "update expense set deleted = '1', status = 'M' where objectId = ?",
                 [id]
                 ).then(function(result){
+                console.log("Delete: OK sync 0");
+                self.syncing = 0; 
                 return DB.fetchAll(result);
             });
             /*
