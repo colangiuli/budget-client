@@ -41,7 +41,9 @@ angular.module('starter.controllers', [])
 	
 
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		Expenses.localSync();
 		Expenses.remoteSync();
+		//Categories.localSync();
 		Categories.remoteSync();
 		console.log("Syncing");
 		//$scope.needSync = ($scope.needSync == 0)?1:0;

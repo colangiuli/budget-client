@@ -90,6 +90,9 @@ angular.module('starter.services', [])
                     }
                 );
 
+            }).error(function() {
+                console.log("error fetching category data from remote");
+                self.syncing = 0;
             });
         };
 
@@ -426,11 +429,103 @@ angular.module('starter.services', [])
 	self.syncing = 0;
 
 
-        self.remoteSync = function(){
-            if (self.syncing == 1)
+        self.localSync = function(){
+            if(self.syncing != 0){
                 return;
+            }else{
+                self.syncing = 1;
+            }
+            DB.query("SELECT * FROM expense where status != 'S'").then(function(result){
+                if (result.rows.length == 0){
+                   self.syncing = 2;
+                   return; 
+                }
+                var riga = result.rows.item(0);
+                var newExpense = {};
+                newExpense.date = riga.date;
+                newExpense.note = riga.note;
+                newExpense.photo = riga.photo;
+                newExpense.value = riga.value;
+                newExpense.deleted = "0";
+                newExpense.shared = false;
+                //-----------ACL
+                newExpense.ACL = {};
+                newExpense.ACL[$window.localStorage['objectId']] = { "read": true, "write": true};
+                if (riga.shared == 'true'){
+                    newExpense.shared = true;
+                    newExpense.ACL["role:friendsOf_" + $window.localStorage['objectId']] = { "read": true};
+                }
+                //-----------category
+                newExpense.categoryID = {
+                    "__type": "Pointer",
+                    "className":"categories",
+                    "objectId": riga.categoryId
+                };
+                //----------owner
+                newExpense.owner = {
+                    "__type": "Pointer",
+                    "className":"_User",
+                    "objectId": $window.localStorage['objectId']
+                };
 
-			self.syncing = 1;
+
+                if(riga.objectId.substr(0,4) == "FAKE"){
+                    $http.post('https://api.parse.com/1/classes/expenses',newExpense,{
+                        headers:{
+                            'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                            'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                            'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
+                            'Content-Type':'application/json'
+                        }
+                    }).success(function(data){
+                        DB.query(
+                             "update expense set status = 'S', objectId = ? where objectId = ?",
+                            [data.objectId, riga.objectId]
+                            ).then(function(result){
+                                self.syncing = 0;
+                                self.localSync();
+                                return;
+                        });
+                    }).error(function() {
+                        console.log("error sending new expense " + riga.objectId + " to remote");
+                        self.syncing = 0;
+                        return;
+                    });
+                }else{
+                    newExpense.objectId = riga.objectId;
+                    return $http.put('https://api.parse.com/1/classes/expenses/'+riga.objectId,newExpense,{
+                        headers:{
+                            'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                            'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                            'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
+                            'Content-Type':'application/json'
+                        }
+                    }).success(function(data){
+                        DB.query(
+                             "update expense set status = 'S' where objectId = ?",
+                            [riga.objectId]
+                            ).then(function(result){
+                                self.syncing = 0;
+                                self.localSync();
+                                return;
+                        });
+                    }).error(function() {
+                        console.log("error updating expense " + riga.objectId  + " to remote");
+                        self.syncing = 0;
+                        return;
+                    });
+                }
+            });
+            
+        }
+
+        self.remoteSync = function(){
+            if (self.syncing != 2){
+                return;
+            }else{
+    			self.syncing = 3;
+            }
+
             return $http.get('https://api.parse.com/1/classes/expenses',{
                 headers:{
                     'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
@@ -491,26 +586,10 @@ angular.module('starter.services', [])
 
 					}
 				);
-				
-				
-				
-				
-				
-				/*DB.insert(query,tmpData).then(function(result){
-					//return DB.fetchAll(result);
-					var d = new Date();
-					self.lastSync = d.toISOString();
-					console.log("successfully synced at " + self.lastSync);
-				});
-				for(var idx = 0; idx < data.length; idx++){
-					query += "('" + data[idx].objectId + "','" + data[idx].categoryID.objectId + "','" + data[idx].date + "','"  + data[idx].note + "','" + data[idx].photo + "','" + data[idx].value + "','" + data[idx].createdAt + "','" + data[idx].updatedAt  + "','" + data[idx].owner.objectId + "'), ";
-				}
-				query = query.substr(0,query.length-2);
-				return DB.query(query).then(function(result){
-					//return DB.fetchAll(result);
-					console.log(result);
-				});*/
-			});
+			}).error(function() {
+                console.log("error fetching expense data from remote");
+                self.syncing = 0;
+            });
         };
         self.getAll = function(){
             return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where expense.deleted != '1'").then(function(result){
