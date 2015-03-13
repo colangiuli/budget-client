@@ -13,11 +13,11 @@ The Friends service returns an array of friend data
 	<center>
 		<i class="icon {{category.icon}}" style="font-size: 70px;"></i>
 		<h4 class="{{budgetColor}}">usati {{used}} di {{category.budget}}</h4>
-		<h4 ng-show="category.shared == true">shared</h4>
+		<h4 ng-show="category.shared == 'true'">shared</h4>
 	</center>
     <ion-list>		
 		<ion-item class="item item-avatar item-complex" ng-repeat="expense in expenses">
-        <img ng-src="{{expense.owner.img}}" class="icon-image">
+        <img ng-src="{{expense.owner_img}}" class="icon-image">
         <div class="row">
             <div class="col-67">
                 <h2>{{expense.note}}</h2>

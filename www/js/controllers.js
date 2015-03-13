@@ -32,12 +32,21 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users) {
+.controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users,Categories,Expenses) {
 	$scope.dateFormat = 'dd/MM/yyyy';
 	$scope.expenseModified=0;
+	$scope.needSync = 0;
 	//first we have to login
 	//Users.login();
 	
+
+	$scope.$watch('expenseModified', function(newVal, oldVal) {
+		Expenses.remoteSync();
+		Categories.remoteSync();
+		console.log("Syncing");
+		//$scope.needSync = ($scope.needSync == 0)?1:0;
+	});
+
 ///////////////////////////////////////////////////////
 /////////      new expense handling
 ///////////////////////////////////////////////////////   	
@@ -50,7 +59,6 @@ angular.module('starter.controllers', [])
 
     $scope.createNewExpense = function(catID) {
 		$scope.newExpense={};
-
 		$scope.newExpense.date = new Date();
 		
 		$scope.newExpense.categoryID = {
@@ -68,12 +76,12 @@ angular.module('starter.controllers', [])
 		$scope.strDotted = "0,00";
 		$scope.show = "calc";
 		
-		Categories.getAll().success(function(data){
-			var tmpArray = data.results;
+		Categories.getAll().then(function(data){
+			var tmpArray = data;
 			var elementXpage = 2;
-			$scope.allCategories = data.results;
+			$scope.allCategories = data;
 			if(!catID){
-				$scope.newExpense.categoryID.objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
+				$scope.newExpense.categoryID_objectId = tmpArray[0].objectId?tmpArray[0].objectId:0;
 			}
 			var outputArray = Array();
 			for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
@@ -98,7 +106,7 @@ angular.module('starter.controllers', [])
 		$scope.newExpense.categoryID = {
 		    "__type": "Pointer",
 		    "className":"categories",
-		    "objectId": $scope.newExpense.categoryID.objectId
+		    "objectId": $scope.newExpense.categoryID_objectId
 		};
 		$scope.newExpense.owner = {
 			"__type": "Pointer",
@@ -109,10 +117,10 @@ angular.module('starter.controllers', [])
 
 		$scope.show = "calc";
 		
-		Categories.getAll().success(function(data){
-			var tmpArray = data.results;
+		Categories.getAll().then(function(data){
+			var tmpArray = data;
 			var elementXpage = 2;
-			$scope.allCategories = data.results;
+			$scope.allCategories = data;
 			var outputArray = Array();
 			var pageTmp = 0;
 			$scope.pageToShow = 0;
@@ -120,8 +128,8 @@ angular.module('starter.controllers', [])
 			var idx2 = 0;
 			for (var idx = 0; idx < tmpArray.length; idx+=elementXpage){
 				elementTmp = tmpArray.slice(idx, idx+elementXpage);
-				for (idx2 = 0; idx2 < elementTmp.length; idx2++){
-					if (elementTmp.objectId == $scope.newExpense.categoryID.objectId){
+				for (var idx2 = 0; idx2 < elementTmp.length; idx2++){
+					if (elementTmp[idx2].objectId == $scope.newExpense.categoryID_objectId){
 						$scope.pageToShow = pageTmp;
 					}
 				}
@@ -145,7 +153,7 @@ angular.module('starter.controllers', [])
 	});	
 
 	$scope.checkSelected = function(categoryToCheck){
-        if($scope.newExpense.categoryID.objectId == categoryToCheck){
+        if($scope.newExpense.categoryID_objectId == categoryToCheck){
 			return "redCat";
 		}
     }
@@ -159,12 +167,12 @@ angular.module('starter.controllers', [])
     }
 	
 	$scope.setCategory = function(categorySelected) {
-        $scope.newExpense.categoryID.objectId = categorySelected;
+        $scope.newExpense.categoryID_objectId = categorySelected;
     }
 	
 	$scope.createExpense = function(){
 		$scope.newExpense.value = $scope.strDotted;
-		selectedCat = $scope.allCategories.filter(function(item){if (item.objectId == $scope.newExpense.categoryID.objectId) return item;});
+		selectedCat = $scope.allCategories.filter(function(item){if (item.objectId == $scope.newExpense.categoryID_objectId) return item;});
 		selectedCat = selectedCat[0];
 		$scope.newExpense.ACL = {};
 		$scope.newExpense.ACL[$localstorage.get('objectId')] = { "read": true, "write": true};
@@ -172,12 +180,12 @@ angular.module('starter.controllers', [])
 			$scope.newExpense.ACL["role:friendsOf_" + $localstorage.get('objectId')] = { "read": true};
 		}
 		if(!!$scope.newExpense.objectId){
-			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).success(function(data){
+			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).then(function(data){
 			   $scope.closeExpenseModalPage();
 			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
 			});
 		}else{
-			Expenses.create($scope.newExpense).success(function(data){
+			Expenses.create($scope.newExpense).then(function(data){
 			   $scope.closeExpenseModalPage();
 			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
 			});
@@ -209,30 +217,30 @@ angular.module('starter.controllers', [])
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
 		console.log("Updating ExpenseDetailCtrl");
-		Expenses.get($stateParams.expenseId).success(function(data){
-				$scope.expense=data;
+		Expenses.get($stateParams.expenseId).then(function(data){
+				$scope.expense=data[0];
 				$scope.category = data.categoryID;
 	    }); 
 	});
 	$scope.dateFormat = 'dd/MM/yyyy';
-		Expenses.get($stateParams.expenseId).success(function(data){
-				$scope.expense=data;
+		Expenses.get($stateParams.expenseId).then(function(data){
+				$scope.expense=data[0];
 				$scope.category = data.categoryID;
 	    }); 
 })
 
-.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, ExpensesLocal, Categories, $state, $ionicSlideBoxDelegate) {
+.controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
 
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
-		ExpensesLocal.remoteSync();
+		Expenses.remoteSync();
 		console.log("Updating ExpensesCtrl");
-		Expenses.getMine().success(function(data){
-			$scope.expenses=data.results;
+		Expenses.getMine().then(function(data){
+			$scope.expenses=data;
 		});
 	});
-	ExpensesLocal.remoteSync();
-	Expenses.getMine().success(function(data){
-        $scope.expenses=data.results;
+	
+	Expenses.getMine().then(function(data){
+        $scope.expenses=data;
     });
 	
 	$scope.removeExpense=function(item){
@@ -255,14 +263,14 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CategoriesCtrl', function($scope, Categories) {
-	Categories.getFull().success(function(data){
-      $scope.categories=data.result;
+	Categories.getFull().then(function(data){
+      $scope.categories=data;
   });
   
   	$scope.$watch('expenseModified', function(newVal, oldVal) {
 		console.log("Updating CategoriesCtrl");
-		Categories.getFull().success(function(data){
-		  $scope.categories=data.result;
+		Categories.getFull().then(function(data){
+		  $scope.categories=data;
 		});
 	});
   
@@ -272,15 +280,15 @@ angular.module('starter.controllers', [])
 	
 	$scope.used = '0,00';	
 	
-	Categories.get($stateParams.categoryId).success(function(data){
-		$scope.category = data;
-		$scope.category.budget = $scope.category.budget.toFixed(2);
+	Categories.get($stateParams.categoryId).then(function(data){
+		$scope.category = data[0];
+		$scope.category.budget = parseFloat($scope.category.budget).toFixed(2);
 		
-		Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
-			$scope.expenses = data.results;
+		Expenses.getAllByCatId($stateParams.categoryId).then(function(data){
+			$scope.expenses = data;
 			var sum = 0;
-			for (var idx = 0;idx < data.results.length; idx++){
-				sum += parseFloat(data.results[idx].value);
+			for (var idx = 0;idx < data.length; idx++){
+				sum += parseFloat(data[idx].value);
 			}
 			$scope.used = 	sum.toFixed(2);
 			budgetFlt = parseFloat($scope.category.budget);
@@ -298,11 +306,11 @@ angular.module('starter.controllers', [])
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
 		console.log("Updating CategoryDetailCtrl");
 		
-		Expenses.getAllByCatId($stateParams.categoryId).success(function(data){
-			$scope.expenses = data.results;
+		Expenses.getAllByCatId($stateParams.categoryId).then(function(data){
+			$scope.expenses = data;
 			var sum = 0;
-			for (var idx = 0;idx < data.results.length; idx++){
-				sum += parseFloat(data.results[idx].value);
+			for (var idx = 0;idx < data.length; idx++){
+				sum += parseFloat(data[idx].value);
 			}
 			$scope.used = 	sum.toFixed(2);
 			budgetFlt = (!!$scope.category && !!$scope.category.budget)?parseFloat($scope.category.budget):0;

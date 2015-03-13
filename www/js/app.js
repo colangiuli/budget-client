@@ -70,6 +70,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   })
   // Each tab has its own nav history stack:
   .state('tab.categories', {
+    cache: false,
     url: '/categories',
     views: {
       'tab-categories': {
@@ -149,27 +150,46 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
                 {name: 'objectId', type: 'text primary key'},
                 {name: 'categoryId', type: 'text'},
                 {name: 'date', type: 'text'},
-				{name: 'note', type: 'text'},
+			         	{name: 'note', type: 'text'},
                 {name: 'photo', type: 'text'},
                 {name: 'value', type: 'text'},
                 {name: 'createdAt', type: 'text'},
                 {name: 'updatedAt', type: 'text'},
                 {name: 'owner', type: 'text'},
-                {name: 'status', type: 'text'}
+                {name: 'owner_img', type: 'text'},
+                {name: 'owner_username', type: 'text'},
+                {name: 'owner_email', type: 'text'},
+                {name: 'status', type: 'text'},
+                {name: 'deleted', type: 'text'}
             ]
         },
-		{
+		    {
+            name: 'users',
+            columns: [
+                {name: 'objectId', type: 'text primary key'},
+                {name: 'username', type: 'text'},
+                {name: 'icon', type: 'text'},
+				        {name: 'email', type: 'text'},
+                {name: 'img', type: 'text'},
+                {name: 'createdAt', type: 'text'},
+                {name: 'updatedAt', type: 'text'},
+                {name: 'status', type: 'text'},
+                {name: 'deleted', type: 'text'}
+            ]
+        },
+        {
             name: 'categories',
             columns: [
                 {name: 'objectId', type: 'text primary key'},
                 {name: 'budget', type: 'text'},
                 {name: 'icon', type: 'text'},
-				{name: 'name', type: 'text'},
+                {name: 'name', type: 'text'},
                 {name: 'shared', type: 'text'},
                 {name: 'createdAt', type: 'text'},
                 {name: 'updatedAt', type: 'text'},
                 {name: 'owner', type: 'text'},
-                {name: 'status', type: 'text'}
+                {name: 'status', type: 'text'},
+                {name: 'deleted', type: 'text'}
             ]
         }
     ]
