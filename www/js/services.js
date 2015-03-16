@@ -114,7 +114,7 @@ angular.module('starter.services', [])
             });
         };
         self.getFull=function(){
-            return DB.query("SELECT categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.OWNER, SUM(expense.value) AS used FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId GROUP BY categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.owner").then(function(result){
+            return DB.query("SELECT categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.OWNER, SUM(expense.value) AS used FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where expense.deleted != '1' GROUP BY categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.owner").then(function(result){
                 return DB.fetchAll(result);
             });
             /*return $http.post('https://api.parse.com/1/functions/categoriesFull',{},{
@@ -239,7 +239,7 @@ angular.module('starter.services', [])
  
     self.init = function() {
         // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
-        self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', -1);
+        self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
  
         angular.forEach(DB_CONFIG.tables, function(table) {
             var columns = [];
@@ -349,6 +349,7 @@ angular.module('starter.services', [])
                    console.log("exp: no more local data to sync");
                    console.log("exp sync 2");
                    self.syncing = 2;
+                   self.remoteSync();
                    return; 
                 }
                 console.log("exp: " + result.rows.length + " rows to sync");
@@ -358,7 +359,7 @@ angular.module('starter.services', [])
                 newExpense.note = riga.note;
                 newExpense.photo = riga.photo;
                 newExpense.value = riga.value;
-                newExpense.deleted = "0";
+                newExpense.deleted = riga.deleted;
                 newExpense.shared = false;
                 //-----------ACL
                 newExpense.ACL = {};

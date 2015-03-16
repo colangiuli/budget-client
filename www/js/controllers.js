@@ -42,7 +42,7 @@ angular.module('starter.controllers', [])
 
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
 		Expenses.localSync();
-		Expenses.remoteSync();
+		//Expenses.remoteSync();
 		//Categories.localSync();
 		Categories.remoteSync();
 		console.log("Syncing");
@@ -193,6 +193,13 @@ angular.module('starter.controllers', [])
 			});
 		}
 	}
+
+	$scope.removeExpense=function(item){
+        Expenses.delete(item.objectId).then(function(data){
+			   //$scope.expenses.splice($scope.expenses.indexOf(item),1);
+        	   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+		});
+    }
 	
 	$scope.addNumber=function(buttonPressed){
         str = $scope.fullString;
@@ -234,7 +241,7 @@ angular.module('starter.controllers', [])
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
 
 	$scope.$watch('expenseModified', function(newVal, oldVal) {
-		Expenses.remoteSync();
+		//Expenses.remoteSync();
 		console.log("Updating ExpensesCtrl");
 		Expenses.getMine().then(function(data){
 			$scope.expenses=data;
@@ -245,11 +252,14 @@ angular.module('starter.controllers', [])
         $scope.expenses=data;
     });
 	
-	$scope.removeExpense=function(item){
-        Expenses.delete(item.objectId);
-        $scope.expenses.splice($scope.expenses.indexOf(item),1);
-    }
 
+/*	$scope.removeExpense=function(item){
+        Expenses.delete(item.objectId).then(function(data){
+			   //$scope.expenses.splice($scope.expenses.indexOf(item),1);
+        	   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+		});       
+    }
+*/
 })
 
 .controller('FriendsCtrl', function($scope, Users) {
@@ -327,10 +337,13 @@ angular.module('starter.controllers', [])
 		
 	});
 	   
-	 $scope.removeExpense=function(item){
-        Expenses.delete(item.objectId);
-        $scope.expenses.splice($scope.expenses.indexOf(item),1);
+/*	$scope.removeExpense=function(item){
+        Expenses.delete(item.objectId).then(function(data){
+			   //$scope.expenses.splice($scope.expenses.indexOf(item),1);
+        	   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+		});
     }
+*/    
 })
 
 
