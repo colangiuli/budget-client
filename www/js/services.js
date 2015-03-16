@@ -507,7 +507,7 @@ angular.module('starter.services', [])
                                 console.log("exp Rem: succesfully inserted remote data in db");
                                 console.log("exp Rem: sync 0");
                                 console.log("exp Rem: successfully synced expenses at " + self.lastSync);
-                                $rootScope.$broadcast("expenseModified");
+                                $rootScope.$broadcast("syncFinished");
                                 self.syncing = 0;
                             }
                         )

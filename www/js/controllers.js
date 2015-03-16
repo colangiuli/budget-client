@@ -32,14 +32,17 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('MainCtrl', function($scope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users,Categories,Expenses) {
+.controller('MainCtrl', function($scope, $rootScope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users,Categories,Expenses) {
 	$scope.dateFormat = 'dd/MM/yyyy';
 	$scope.expenseModified=0;
 	$scope.needSync = 0;
 	//first we have to login
 	//Users.login();
 	
-
+	/*$scope.$on("syncFinished",function(){
+		console.log("received event syncFinished");
+		$scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+	});*/
 	$scope.$watch('needSync', function(newVal, oldVal) {
 		console.log("Syncing");
 		Expenses.localSync();
@@ -187,11 +190,13 @@ angular.module('starter.controllers', [])
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).then(function(data){
 			   $scope.closeExpenseModalPage();
 			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+			   $scope.needSync = ($scope.needSync == 0)?1:0;
 			});
 		}else{
 			Expenses.create($scope.newExpense).then(function(data){
 			   $scope.closeExpenseModalPage();
 			   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+			   $scope.needSync = ($scope.needSync == 0)?1:0;
 			});
 		}
 	}
@@ -200,6 +205,7 @@ angular.module('starter.controllers', [])
         Expenses.delete(item.objectId).then(function(data){
 			   //$scope.expenses.splice($scope.expenses.indexOf(item),1);
         	   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+        	   $scope.needSync = ($scope.needSync == 0)?1:0;
 		});
     }
 	
@@ -226,42 +232,36 @@ angular.module('starter.controllers', [])
 
 
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
-	$scope.$watch('expenseModified', function(newVal, oldVal) {
+
+	$scope.dateFormat = 'dd/MM/yyyy';
+	
+	$scope.refreshView = function(){
 		console.log("Updating ExpenseDetailCtrl");
 		Expenses.get($stateParams.expenseId).then(function(data){
 				$scope.expense=data[0];
 				$scope.category = data.categoryID;
 	    }); 
-	});
-	$scope.dateFormat = 'dd/MM/yyyy';
-		Expenses.get($stateParams.expenseId).then(function(data){
-				$scope.expense=data[0];
-				$scope.category = data.categoryID;
-	    }); 
+	}
+	$scope.$watch('expenseModified', $scope.refreshView);
+
+	$scope.$on("syncFinished",$scope.refreshView);
+
+	//$scope.refreshView();
 })
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
 
-	$scope.$watch('expenseModified', function(newVal, oldVal) {
-		//Expenses.remoteSync();
+	$scope.refreshView = function(){
 		console.log("Updating ExpensesCtrl");
 		Expenses.getMine().then(function(data){
 			$scope.expenses=data;
 		});
-	});
-	
-	Expenses.getMine().then(function(data){
-        $scope.expenses=data;
-    });
-	
+	}
+	$scope.$watch('expenseModified', $scope.refreshView);
 
-/*	$scope.removeExpense=function(item){
-        Expenses.delete(item.objectId).then(function(data){
-			   //$scope.expenses.splice($scope.expenses.indexOf(item),1);
-        	   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
-		});       
-    }
-*/
+	$scope.$on("syncFinished",$scope.refreshView);
+	
+	//$scope.refreshView();
 })
 
 .controller('FriendsCtrl', function($scope, Users) {
@@ -277,75 +277,62 @@ angular.module('starter.controllers', [])
 })
 
 .controller('CategoriesCtrl', function($scope, Categories) {
-	Categories.getFull().then(function(data){
-      $scope.categories=data;
-  });
-  
-  	$scope.$watch('expenseModified', function(newVal, oldVal) {
+
+	$scope.refreshView = function(){
 		console.log("Updating CategoriesCtrl");
 		Categories.getFull().then(function(data){
 		  $scope.categories=data;
 		});
-	});
+	}
+	$scope.$watch('expenseModified', $scope.refreshView);
+
+	$scope.$on("syncFinished",$scope.refreshView);
+
+	//$scope.refreshView();
   
 })
 
 .controller('CategoryDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
 	
 	$scope.used = '0,00';	
+	$scope.budgetFlt = 0,00;
+
+	$scope.refreshView = function(){
+		console.log("Updating CategoryDetailCtrl");
+		Expenses.getAllByCatId($stateParams.categoryId).then(function(data){
+			$scope.expenses = data;
+			var sum = 0;
+			for (var idx = 0;idx < data.length; idx++){
+				sum += parseFloat(data[idx].value);
+			}
+			$scope.used = 	sum.toFixed(2);
+			
+			if (sum > $scope.budgetFlt){
+				$scope.budgetColor = "assertive";
+			}else if(sum/$scope.budgetFlt > 0.8){
+				$scope.budgetColor = "energized";
+			}else{
+				$scope.budgetColor = "balanced";
+			}
+		});
+	}
+	$scope.$watch('expenseModified', $scope.refreshView);
+
+	$scope.$on("syncFinished",$scope.refreshView);
+/*$scope.$on("syncFinished",function(){
+		console.log("expense Detail received event syncFinished");
+		$scope.refreshView();
+//		$scope.expenseModified = ($scope.expenseModified == 0)?1:0;
+	});*/
+	$scope.refreshView();
+
 	
 	Categories.get($stateParams.categoryId).then(function(data){
 		$scope.category = data[0];
 		$scope.category.budget = parseFloat($scope.category.budget).toFixed(2);
-		
-		Expenses.getAllByCatId($stateParams.categoryId).then(function(data){
-			$scope.expenses = data;
-			var sum = 0;
-			for (var idx = 0;idx < data.length; idx++){
-				sum += parseFloat(data[idx].value);
-			}
-			$scope.used = 	sum.toFixed(2);
-			budgetFlt = parseFloat($scope.category.budget);
-			if (sum > budgetFlt){
-				$scope.budgetColor = "assertive";
-			}else if(sum/budgetFlt > 0.8){
-				$scope.budgetColor = "energized";
-			}else{
-				$scope.budgetColor = "balanced";
-			}
-		});
-		
-	});
-	
-	$scope.$watch('expenseModified', function(newVal, oldVal) {
-		console.log("Updating CategoryDetailCtrl");
-		
-		Expenses.getAllByCatId($stateParams.categoryId).then(function(data){
-			$scope.expenses = data;
-			var sum = 0;
-			for (var idx = 0;idx < data.length; idx++){
-				sum += parseFloat(data[idx].value);
-			}
-			$scope.used = 	sum.toFixed(2);
-			budgetFlt = (!!$scope.category && !!$scope.category.budget)?parseFloat($scope.category.budget):0;
-			if (sum > budgetFlt){
-				$scope.budgetColor = "assertive";
-			}else if(sum/budgetFlt > 0.8){
-				$scope.budgetColor = "energized";
-			}else{
-				$scope.budgetColor = "balanced";
-			}
-		});
-		
-	});
-	   
-/*	$scope.removeExpense=function(item){
-        Expenses.delete(item.objectId).then(function(data){
-			   //$scope.expenses.splice($scope.expenses.indexOf(item),1);
-        	   $scope.expenseModified = ($scope.expenseModified == 0)?1:0;
-		});
-    }
-*/    
+		$scope.budgetFlt = (!!$scope.category && !!$scope.category.budget)?parseFloat($scope.category.budget):0;
+		//$scope.refreshView();
+	}); 
 })
 
 
