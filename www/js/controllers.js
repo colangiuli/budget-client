@@ -40,12 +40,13 @@ angular.module('starter.controllers', [])
 	//Users.login();
 	
 
-	$scope.$watch('expenseModified', function(newVal, oldVal) {
+	$scope.$watch('needSync', function(newVal, oldVal) {
+		console.log("Syncing");
 		Expenses.localSync();
 		//Expenses.remoteSync();
 		//Categories.localSync();
-		Categories.remoteSync();
-		console.log("Syncing");
+		//Categories.remoteSync();
+		
 		//$scope.needSync = ($scope.needSync == 0)?1:0;
 	});
 
@@ -68,6 +69,7 @@ angular.module('starter.controllers', [])
 			"className":"categories",
 			"objectId": catID?catID:""
 		};
+		$scope.newExpense.categoryID_objectId = catID;
 		$scope.newExpense.owner = {
 			"__type": "Pointer",
 			"className":"_User",

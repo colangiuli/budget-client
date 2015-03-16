@@ -114,7 +114,7 @@ angular.module('starter.services', [])
             });
         };
         self.getFull=function(){
-            return DB.query("SELECT categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.OWNER, SUM(expense.value) AS used FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where expense.deleted != '1' GROUP BY categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.owner").then(function(result){
+            return DB.query("SELECT categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.OWNER, ifnull(SUM(expense.value),0) AS used FROM categories LEFT JOIN expense ON (expense.categoryId = categories.objectId and expense.deleted != '1') GROUP BY categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.owner").then(function(result){
                 return DB.fetchAll(result);
             });
             /*return $http.post('https://api.parse.com/1/functions/categoriesFull',{},{
@@ -327,7 +327,7 @@ angular.module('starter.services', [])
     
     return self;
 })
-.factory('Expenses',['$http','PARSE_CREDENTIALS','$window','DB',function($http,PARSE_CREDENTIALS,$window,DB){
+.factory('Expenses',['$http','PARSE_CREDENTIALS','$window','DB','$rootScope',function($http,PARSE_CREDENTIALS,$window,DB,$rootScope){
 	var self = this;
     self.lastSync = '2013-03-07T11:35:46.622Z';
 	self.syncing = 0;
@@ -496,7 +496,7 @@ angular.module('starter.services', [])
                                 };
                             },
                             function(error){
-                                console.log("exp Rem: error inserting data in local db");
+                                console.log("exp Rem: error inserting remote data in db");
                                 console.log("exp Rem: sync 0");
                                 self.syncing = 0;
                                 console.log(error);
@@ -504,9 +504,10 @@ angular.module('starter.services', [])
                             function(){
                                 var d = new Date();
                                 self.lastSync = d.toISOString();
-                                console.log("exp Rem: error deleting local data");
+                                console.log("exp Rem: succesfully inserted remote data in db");
                                 console.log("exp Rem: sync 0");
                                 console.log("exp Rem: successfully synced expenses at " + self.lastSync);
+                                $rootScope.$broadcast("expenseModified");
                                 self.syncing = 0;
                             }
                         )
