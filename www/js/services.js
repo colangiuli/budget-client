@@ -114,7 +114,7 @@ angular.module('starter.services', [])
             });
         };
         self.getFull=function(){
-            return DB.query("SELECT categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.OWNER, ifnull(SUM(expense.value),0) AS used FROM categories LEFT JOIN expense ON (expense.categoryId = categories.objectId and expense.deleted != '1') GROUP BY categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.owner").then(function(result){
+            return DB.query("SELECT categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.OWNER, ifnull(SUM(expense.value),0) AS used FROM categories LEFT JOIN expense ON (expense.categoryId = categories.objectId and strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1') GROUP BY categories.objectId, categories.budget, categories.icon, categories.NAME, categories.shared, categories.createdAt, categories.updatedAt, categories.owner").then(function(result){
                 return DB.fetchAll(result);
             });
             /*return $http.post('https://api.parse.com/1/functions/categoriesFull',{},{
@@ -240,6 +240,51 @@ angular.module('starter.services', [])
     self.init = function() {
         // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
         self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
+        var deferred = $q.defer();
+
+        self.db.transaction(
+            function(transaction) {
+                /*for (var i=0; i<bindingsArray.length; i++){ 
+                    queryD = "delete from expense where objectId = '" + bindingsArray[i][0] + "'";
+                    console.log(queryD);
+                    transaction.executeSql(queryD);
+                };*/
+                angular.forEach(DB_CONFIG.tables, function(table) {
+                    var columns = [];
+         
+                    angular.forEach(table.columns, function(column) {
+                        columns.push(column.name + ' ' + column.type);
+                    });
+         
+                    var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
+                    //self.query(query);
+                    transaction.executeSql(query);
+                    console.log (query);
+                    console.log('Table ' + table.name + ' initialized');
+                });
+
+
+
+            },
+            function(error){
+                console.log("init error");
+                console.log(error);
+                deferred.reject();
+            },
+            function(){
+                console.log("init ok");
+                deferred.resolve();
+
+            }
+        );
+
+        return deferred.promise;
+    
+    };
+
+    self.reset = function() {
+        self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); //in production
+        //self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
  
         angular.forEach(DB_CONFIG.tables, function(table) {
             var columns = [];
@@ -248,10 +293,10 @@ angular.module('starter.services', [])
                 columns.push(column.name + ' ' + column.type);
             });
  
-            var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
+            var query = 'DROP TABLE IF EXISTS ' + table.name;
             self.query(query);
             console.log (query);
-            console.log('Table ' + table.name + ' initialized');
+            console.log('Table ' + table.name + ' deleted');
         });
     };
  
@@ -263,6 +308,7 @@ angular.module('starter.services', [])
             transaction.executeSql(query, bindings, function(transaction, result) {
                 deferred.resolve(result);
             }, function(transaction, error) {
+                console.log("error executing: " + query);
                 console.log(error);
                 deferred.reject(error);
             });
@@ -282,6 +328,7 @@ angular.module('starter.services', [])
 				};
 			},
 			function(error){
+                console.log(query);
 				console.log(error);
 			},
 			function(){
@@ -521,18 +568,18 @@ angular.module('starter.services', [])
             });
         };
         self.getAll = function(){
-            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where expense.deleted != '1'").then(function(result){
+            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1'").then(function(result){
                 return DB.fetchAll(result);
             });
         };		
         self.getMine = function(){
-            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where expense.deleted != '1' AND expense.owner = '" + $window.localStorage['objectId'] + "'").then(function(result){
+            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1' AND expense.owner = '" + $window.localStorage['objectId'] + "'").then(function(result){
 				return DB.fetchAll(result);
 			});
         };		
 		
         self.getAllByCatId = function(categoryId){
-            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where expense.deleted != '1' AND expense.categoryID = '" + categoryId + "'").then(function(result){
+            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1' AND expense.categoryID = '" + categoryId + "'").then(function(result){
                 return DB.fetchAll(result);
             });
         };

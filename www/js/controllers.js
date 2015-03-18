@@ -1,12 +1,17 @@
 angular.module('starter.controllers', [])
 
-.controller('SignInCtrl', function($scope, $state, Users, $window, $http) {
+.controller('SignInCtrl', function($scope, $state, Users, $window, $http, DB) {
+
 	$scope.user = {"username": $window.localStorage['username']};
 	if ((!!$window.localStorage['SESSION_TOKEN']) && ($window.localStorage['SESSION_TOKEN'] !="") ){
-		$state.go('tab.categories');
+		DB.init().then(function(){
+			$state.go('tab.categories');
+		});
+
 	}
 	
 	$scope.signIn = function(user) {
+
 		Users.login(user).
 				success(function(data){
 					// this callback will be called asynchronously
@@ -17,11 +22,14 @@ angular.module('starter.controllers', [])
 					$window.localStorage['icon'] = data.icon;
 					$window.localStorage['email'] = data.email;
 					$window.localStorage['img'] = data.img;
-					$state.go('tab.categories');
+					//$state.go('tab.categories');
 					Users.getFriendsRole().success(function(data){
 						// this callback will be called asynchronously
 						// when the response is available
 						$window.localStorage['FRIENDS_ROLE_ID'] = data.results[0].objectId;
+						DB.init().then(function(){
+							$state.go('tab.categories');
+						});
 					});
 				}).error(function() {
 					alert("login error!");
@@ -48,7 +56,7 @@ angular.module('starter.controllers', [])
 		Expenses.localSync();
 		//Expenses.remoteSync();
 		//Categories.localSync();
-		//Categories.remoteSync();
+		Categories.remoteSync();
 		
 		//$scope.needSync = ($scope.needSync == 0)?1:0;
 	});
@@ -336,12 +344,14 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('AccountCtrl', function($scope, $state, $localstorage) {
+.controller('AccountCtrl', function($scope, $state, $localstorage, DB) {
   $scope.username =  $localstorage.get('username');
   $scope.email =  $localstorage.get('email');
   $scope.img =  $localstorage.get('img');
   $scope.signOut= function() {
 		$localstorage.set('SESSION_TOKEN',"");
-		$state.go('signin');
+		DB.reset().then(function(){
+			$state.go('signin');
+		});
 	};
 });

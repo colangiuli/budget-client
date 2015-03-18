@@ -15,7 +15,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   $rootScope.$on('loading:hide', function() {
     $ionicLoading.hide();
   })
-  DB.init();
+  //DB.init();
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
     // for form inputs)
@@ -26,7 +26,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       // org.apache.cordova.statusbar required
       StatusBar.styleDefault();
     }
-	DB.init();
+	//
     //intialize parse
     //Parse.initialize("WbAXovOrZQo9Mxr7TtPOXsxPuofZ0R8FEaW7qrTt", "iuRiAFBNVw7aCA7tHQRszUsgjXhnHiDubag4ZCRn");
   });
