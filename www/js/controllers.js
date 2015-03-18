@@ -44,6 +44,7 @@ angular.module('starter.controllers', [])
 	$scope.dateFormat = 'dd/MM/yyyy';
 	$scope.expenseModified=0;
 	$scope.needSync = 0;
+
 	//first we have to login
 	//Users.login();
 	
@@ -354,4 +355,9 @@ angular.module('starter.controllers', [])
 			$state.go('signin');
 		});
 	};
+})
+
+.controller('DebugCtrl', function($scope, $state, $localstorage, DB) {
+  //$scope.debugs = "ddddd"
+  $scope.test = $localstorage.get('log');
 });

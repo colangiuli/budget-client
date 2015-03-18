@@ -25,6 +25,15 @@
     <script src="js/app.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/services.js"></script>
+
+        <script type="text/javascript">
+      var console = {};
+      localStorage.log = "";
+      console.log = function(logString){
+        localStorage.log += logString + "\r\n";
+      };
+      window.console = console;
+    </script>
   </head>
   <body ng-app="starter">
     <!--
