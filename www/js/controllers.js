@@ -254,8 +254,6 @@ angular.module('starter.controllers', [])
 	$scope.$watch('expenseModified', $scope.refreshView);
 
 	$scope.$on("syncFinished",$scope.refreshView);
-
-	//$scope.refreshView();
 })
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
@@ -269,8 +267,6 @@ angular.module('starter.controllers', [])
 	$scope.$watch('expenseModified', $scope.refreshView);
 
 	$scope.$on("syncFinished",$scope.refreshView);
-	
-	//$scope.refreshView();
 })
 
 .controller('FriendsCtrl', function($scope, Users) {
@@ -296,8 +292,6 @@ angular.module('starter.controllers', [])
 	$scope.$watch('expenseModified', $scope.refreshView);
 
 	$scope.$on("syncFinished",$scope.refreshView);
-
-	//$scope.refreshView();
   
 })
 
@@ -328,12 +322,7 @@ angular.module('starter.controllers', [])
 	$scope.$watch('expenseModified', $scope.refreshView);
 
 	$scope.$on("syncFinished",$scope.refreshView);
-/*$scope.$on("syncFinished",function(){
-		console.log("expense Detail received event syncFinished");
-		$scope.refreshView();
-//		$scope.expenseModified = ($scope.expenseModified == 0)?1:0;
-	});*/
-	$scope.refreshView();
+	//$scope.refreshView();
 
 	
 	Categories.get($stateParams.categoryId).then(function(data){
@@ -351,6 +340,7 @@ angular.module('starter.controllers', [])
   $scope.img =  $localstorage.get('img');
   $scope.signOut= function() {
 		$localstorage.set('SESSION_TOKEN',"");
+		$window.localStorage['lastExpenseSync'] = '2013-03-07T11:35:46.622Z';
 		DB.reset().then(function(){
 			$state.go('signin');
 		});

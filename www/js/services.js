@@ -376,7 +376,13 @@ angular.module('starter.services', [])
 })
 .factory('Expenses',['$http','PARSE_CREDENTIALS','$window','DB','$rootScope',function($http,PARSE_CREDENTIALS,$window,DB,$rootScope){
 	var self = this;
-    self.lastSync = '2013-03-07T11:35:46.622Z';
+    
+    if (!$window.localStorage['lastExpenseSync']){
+       $window.localStorage['lastExpenseSync'] = '2013-03-07T11:35:46.622Z';
+    }
+    //self.lastSync = '2013-03-07T11:35:46.622Z';
+    
+
 	self.syncing = 0;
 
 
@@ -391,7 +397,7 @@ angular.module('starter.services', [])
                 console.log("exp: sync 1");
             }
             console.log("exp: getting modified local data");
-            DB.query("SELECT * FROM expense where status != 'S'").then(function(result){
+            DB.query("SELECT expense.*, categories.shared FROM expense inner join categories on expense.categoryId = categories.objectId where expense.status != 'S'").then(function(result){
                 if (result.rows.length == 0){
                    console.log("exp: no more local data to sync");
                    console.log("exp sync 2");
@@ -500,7 +506,7 @@ angular.module('starter.services', [])
 					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
                 },
 				params:  { 
-		            where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + self.lastSync + '"}}}',
+		            where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + $window.localStorage['lastExpenseSync']  + '"}}}',
 					order: '-date',
 		            //limit: 2,
 		            // count: 1
@@ -550,10 +556,10 @@ angular.module('starter.services', [])
                             },
                             function(){
                                 var d = new Date();
-                                self.lastSync = d.toISOString();
+                                $window.localStorage['lastExpenseSync']  = d.toISOString();
                                 console.log("exp Rem: succesfully inserted remote data in db");
                                 console.log("exp Rem: sync 0");
-                                console.log("exp Rem: successfully synced expenses at " + self.lastSync);
+                                console.log("exp Rem: successfully synced expenses at " + $window.localStorage['lastExpenseSync'] );
                                 $rootScope.$broadcast("syncFinished");
                                 self.syncing = 0;
                             }
