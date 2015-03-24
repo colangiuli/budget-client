@@ -299,6 +299,7 @@ angular.module('starter.controllers', [])
 	
 	$scope.used = '0,00';	
 	$scope.budgetFlt = 0,00;
+	$scope.monthSelected = "2015-03";
 
 	$scope.refreshView = function(){
 		console.log("Updating CategoryDetailCtrl");
@@ -321,12 +322,18 @@ angular.module('starter.controllers', [])
 	}
 	$scope.$watch('expenseModified', $scope.refreshView);
 
+	$scope.monthChanged = function(monthSelected){
+
+		console.log("month now is :" + monthSelected);
+	};
+
 	$scope.$on("syncFinished",$scope.refreshView);
 	//$scope.refreshView();
 
 	
 	Categories.get($stateParams.categoryId).then(function(data){
 		$scope.category = data[0];
+		$scope.category.shareLabel = $scope.category.shared == 'true'? 'shared':''; 
 		$scope.category.budget = parseFloat($scope.category.budget).toFixed(2);
 		$scope.budgetFlt = (!!$scope.category && !!$scope.category.budget)?parseFloat($scope.category.budget):0;
 		//$scope.refreshView();
