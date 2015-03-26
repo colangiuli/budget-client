@@ -20,7 +20,11 @@ angular.module('starter.services', [])
 
 .factory('Categories',['$http','PARSE_CREDENTIALS','$window', 'DB',function($http,PARSE_CREDENTIALS,$window, DB){
     var self = this;
-    self.lastSync = '2013-03-07T11:35:46.622Z';
+    //self.lastSync = '2013-03-07T11:35:46.622Z';
+
+    //if (!$window.localStorage['lastCategoriesSync']){
+       $window.localStorage['lastCategoriesSync'] = '2013-03-07T11:35:46.622Z';
+    //}
     self.syncing = 0;
 
 
@@ -35,74 +39,87 @@ angular.module('starter.services', [])
             self.syncing = 1;
             console.log("getting data from remote");
             console.log("cat sync 1");
-            return $http.get('https://api.parse.com/1/classes/categories',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-                    'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-                params:  { 
-                    where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + self.lastSync + '"}}}',
-                    order: '-date',
-                    //limit: 2,
-                    // count: 1
-                    //'include': 'categoryID, owner'
-                }
-            }).success(function(data){
-                console.log("cat: received data from remote");
-                var queryD = "delete from categories where objectId = '?'";
-                var queryI = "insert into categories (objectId,budget,icon,name,shared,createdAt,updatedAt,status,deleted) values (?,?,?,?,?,?,?,'S',?)";
-                if (!!data.results)
-                    data = data.results;
-                var tmpData = [];
-                for(var idx = 0; idx < data.length; idx++){
-                    tmpData.push([data[idx].objectId, data[idx].budget, data[idx].icon, data[idx].name, data[idx].shared, data[idx].createdAt, data[idx].updatedAt,data[idx].deleted]);
-                }
-                            
-                var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
-         
-                DB.db.transaction(
-                    function(transaction) {
-                        for (var i=0; i<bindingsArray.length; i++){ 
-                            queryD = "delete from categories where objectId = '" + bindingsArray[i][0] + "'";
-                            console.log(queryD);
-                            transaction.executeSql(queryD);
-                        };
-                    },
-                    function(error){
-                        self.syncing = 0;
-                        console.log("cat sync 0");
-                        console.log(error);
-                    },
-                    function(){
-                        DB.db.transaction(
-                            function(innertransaction) {
-                                for (var idx=0; idx<bindingsArray.length; idx++){ 
-                                    innertransaction.executeSql(queryI, bindingsArray[idx]);
-                                };
-                            },
-                            function(error){
-                                self.syncing = 0;
-                                console.log("cat sync 0");
-                                console.log("error inserting cqategories:");
-                                console.log(error);
-                            },
-                            function(){
-                                var d = new Date();
-                                self.lastSync = d.toISOString();
-                                console.log("successfully synced Categories at " + self.lastSync);
-                                console.log("cat sync 0");
-                                self.syncing = 0;
-                            }
-                        )
 
+
+             DB.query("SELECT max(updatedAt) as lastSync from categories").then(function(result){
+                if ( (result.rows.length == 0) || (result.rows.item(0).lastSync == null) ){
+                   console.log("cat sync: lastSync is empty, init");
+                   $window.localStorage['lastCategoriesSync'] = '2013-03-07T11:35:46.622Z';
+                }else{
+                    $window.localStorage['lastCategoriesSync'] = result.rows.item(0).lastSync;
+                    console.log("cat sync: lastSync is " + $window.localStorage['lastCategoriesSync'] );
+                }
+
+
+                $http.get('https://api.parse.com/1/classes/categories',{
+                    headers:{
+                        'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                        'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                        'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
+                    },
+                    params:  { 
+                        where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + $window.localStorage['lastCategoriesSync'] + '"}}}',
+                        order: '-date',
+                        //limit: 2,
+                        // count: 1
+                        //'include': 'categoryID, owner'
                     }
-                );
+                }).success(function(data){
+                    console.log("cat: received data from remote");
+                    var queryD = "delete from categories where objectId = '?'";
+                    var queryI = "insert into categories (objectId,budget,icon,name,shared,createdAt,updatedAt,status,deleted) values (?,?,?,?,?,?,?,'S',?)";
+                    if (!!data.results)
+                        data = data.results;
+                    var tmpData = [];
+                    for(var idx = 0; idx < data.length; idx++){
+                        tmpData.push([data[idx].objectId, data[idx].budget, data[idx].icon, data[idx].name, data[idx].shared, data[idx].createdAt, data[idx].updatedAt,data[idx].deleted]);
+                    }
+                                
+                    var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
+             
+                    DB.db.transaction(
+                        function(transaction) {
+                            for (var i=0; i<bindingsArray.length; i++){ 
+                                queryD = "delete from categories where objectId = '" + bindingsArray[i][0] + "'";
+                                console.log(queryD);
+                                transaction.executeSql(queryD);
+                            };
+                        },
+                        function(error){
+                            self.syncing = 0;
+                            console.log("cat sync 0");
+                            console.log(error);
+                        },
+                        function(){
+                            DB.db.transaction(
+                                function(innertransaction) {
+                                    for (var idx=0; idx<bindingsArray.length; idx++){ 
+                                        innertransaction.executeSql(queryI, bindingsArray[idx]);
+                                    };
+                                },
+                                function(error){
+                                    self.syncing = 0;
+                                    console.log("cat sync 0");
+                                    console.log("error inserting categories:");
+                                    console.log(error);
+                                },
+                                function(){
+                                    var d = new Date();
+                                    //$window.localStorage['lastCategoriesSync'] = d.toISOString();
+                                    console.log("successfully synced Categories at " + $window.localStorage['lastCategoriesSync']);
+                                    console.log("cat sync 0");
+                                    self.syncing = 0;
+                                }
+                            )
 
-            }).error(function() {
-                console.log("error fetching category data from remote");
-                console.log("cat sync 0");
-                self.syncing = 0;
+                        }
+                    );
+
+                }).error(function() {
+                    console.log("error fetching category data from remote");
+                    console.log("cat sync 0");
+                    self.syncing = 0;
+                });
             });
         };
 
@@ -282,23 +299,47 @@ angular.module('starter.services', [])
     
     };
 
+
     self.reset = function() {
-        self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); //in production
-        //self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
- 
-        angular.forEach(DB_CONFIG.tables, function(table) {
-            var columns = [];
- 
-            angular.forEach(table.columns, function(column) {
-                columns.push(column.name + ' ' + column.type);
-            });
- 
-            var query = 'DROP TABLE IF EXISTS ' + table.name;
-            self.query(query);
-            console.log (query);
-            console.log('Table ' + table.name + ' deleted');
-        });
+        // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
+        self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
+        var deferred = $q.defer();
+
+        self.db.transaction(
+            function(transaction) {
+                /*for (var i=0; i<bindingsArray.length; i++){ 
+                    queryD = "delete from expense where objectId = '" + bindingsArray[i][0] + "'";
+                    console.log(queryD);
+                    transaction.executeSql(queryD);
+                };*/
+                angular.forEach(DB_CONFIG.tables, function(table) {
+         
+                    var query = 'DROP TABLE IF EXISTS ' + table.name;
+                    //self.query(query);
+                    transaction.executeSql(query);
+                    console.log (query);
+                    console.log('Table ' + table.name + ' erased');
+                });
+
+
+
+            },
+            function(error){
+                console.log("init error");
+                console.log(error);
+                deferred.reject();
+            },
+            function(){
+                console.log("init ok");
+                deferred.resolve();
+
+            }
+        );
+
+        return deferred.promise;
     };
+
+
  
     self.query = function(query, bindings) {
         bindings = typeof bindings !== 'undefined' ? bindings : [];
@@ -376,12 +417,6 @@ angular.module('starter.services', [])
 })
 .factory('Expenses',['$http','PARSE_CREDENTIALS','$window','DB','$rootScope',function($http,PARSE_CREDENTIALS,$window,DB,$rootScope){
 	var self = this;
-    
-    if (!$window.localStorage['lastExpenseSync']){
-       $window.localStorage['lastExpenseSync'] = '2013-03-07T11:35:46.622Z';
-    }
-    //self.lastSync = '2013-03-07T11:35:46.622Z';
-    
 
 	self.syncing = 0;
 
@@ -490,6 +525,10 @@ angular.module('starter.services', [])
         }
 
         self.remoteSync = function(){
+
+            //if (!$window.localStorage['lastExpenseSync']){
+               $window.localStorage['lastExpenseSync'] = '2013-03-07T11:35:46.622Z';
+            //}
             console.log("exp Rem: entering remote sync");
             if (self.syncing != 2){
                 console.log("exp Rem: status not = 2, it is " + self.syncing + " exiting");
@@ -499,93 +538,106 @@ angular.module('starter.services', [])
     			self.syncing = 3;
             }
             console.log("exp Rem: getting remote data");
-            return $http.get('https://api.parse.com/1/classes/expenses',{
-                headers:{
-                    'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                    'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
-                },
-				params:  { 
-		            where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + $window.localStorage['lastExpenseSync']  + '"}}}',
-					order: '-date',
-		            //limit: 2,
-		            // count: 1
-			   		'include': 'owner'
-	            }
-            }).success(function(data){
-                console.log("exp Rem: succesfully received remote data");
-				var queryD = "delete from expense where objectId = '?'";
-				var queryI = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'S',?)"
-				if (!!data.results)
-					data = data.results;
-				var tmpData = [];
-				for(var idx = 0; idx < data.length; idx++){
-					tmpData.push([data[idx].objectId, data[idx].categoryID.objectId, data[idx].date, data[idx].note, data[idx].photo, data[idx].value, data[idx].createdAt, data[idx].updatedAt, data[idx].owner.objectId, data[idx].owner.img, data[idx].owner.username, data[idx].owner.email,data[idx].deleted]);
-				}
 
 
-				var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
-		        console.log("exp Rem: deleting local data");
-				DB.db.transaction(
-					function(transaction) {
-						for (var i=0; i<bindingsArray.length; i++){ 
-                            queryD = "delete from expense where objectId = '" + bindingsArray[i][0] + "'";
-                            console.log(queryD);
-							transaction.executeSql(queryD);
-						};
-					},
-					function(error){
-                        console.log("exp Rem: error deleting local data");
-                        console.log("exp Rem: sync 0");
-						self.syncing = 0;
-						console.log(error);
-					},
-					function(){
-                        console.log("exp Rem: inserting remote data in db");
-                        DB.db.transaction(
-                            function(innertransaction) {
-                                for (var idx=0; idx<bindingsArray.length; idx++){ 
-                                    innertransaction.executeSql(queryI, bindingsArray[idx]);
-                                };
-                            },
-                            function(error){
-                                console.log("exp Rem: error inserting remote data in db");
-                                console.log("exp Rem: sync 0");
-                                self.syncing = 0;
-                                console.log(error);
-                            },
-                            function(){
-                                var d = new Date();
-                                $window.localStorage['lastExpenseSync']  = d.toISOString();
-                                console.log("exp Rem: succesfully inserted remote data in db");
-                                console.log("exp Rem: sync 0");
-                                console.log("exp Rem: successfully synced expenses at " + $window.localStorage['lastExpenseSync'] );
-                                $rootScope.$broadcast("syncFinished");
-                                self.syncing = 0;
-                            }
-                        )
 
-					}
-				);
-			}).error(function() {
-                console.log("exp Rem: error fetching expense data from remote");
-                console.log("exp Rem: sync 0");
-                self.syncing = 0;
-            });
+            DB.query("SELECT max(updatedAt) as lastSync from expense").then(function(result){
+            if ( (result.rows.length == 0) || (result.rows.item(0).lastSync == null) ){
+               console.log("exp sync: lastSync is empty, init");
+               $window.localStorage['lastExpenseSync'] = '2013-03-07T11:35:46.622Z';
+            }else{
+                $window.localStorage['lastExpenseSync'] = result.rows.item(0).lastSync;
+                console.log("cat sync: lastSync is " + $window.localStorage['lastExpenseSync'] );
+            }
+
+                return $http.get('https://api.parse.com/1/classes/expenses',{
+                    headers:{
+                        'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                        'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+    					'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN']
+                    },
+    				params:  { 
+    		            where: '{"updatedAt":{"$gte":{"__type":"Date","iso":"' + $window.localStorage['lastExpenseSync']  + '"}}}',
+    					order: '-date',
+    		            //limit: 2,
+    		            // count: 1
+    			   		'include': 'owner'
+    	            }
+                }).success(function(data){
+                    console.log("exp Rem: succesfully received remote data");
+    				var queryD = "delete from expense where objectId = '?'";
+    				var queryI = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'S',?)"
+    				if (!!data.results)
+    					data = data.results;
+    				var tmpData = [];
+    				for(var idx = 0; idx < data.length; idx++){
+    					tmpData.push([data[idx].objectId, data[idx].categoryID.objectId, data[idx].date, data[idx].note, data[idx].photo, data[idx].value, data[idx].createdAt, data[idx].updatedAt, data[idx].owner.objectId, data[idx].owner.img, data[idx].owner.username, data[idx].owner.email,data[idx].deleted]);
+    				}
+
+
+    				var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
+    		        console.log("exp Rem: deleting local data");
+    				DB.db.transaction(
+    					function(transaction) {
+    						for (var i=0; i<bindingsArray.length; i++){ 
+                                queryD = "delete from expense where objectId = '" + bindingsArray[i][0] + "'";
+                                console.log(queryD);
+    							transaction.executeSql(queryD);
+    						};
+    					},
+    					function(error){
+                            console.log("exp Rem: error deleting local data");
+                            console.log("exp Rem: sync 0");
+    						self.syncing = 0;
+    						console.log(error);
+    					},
+    					function(){
+                            console.log("exp Rem: inserting remote data in db");
+                            DB.db.transaction(
+                                function(innertransaction) {
+                                    for (var idx=0; idx<bindingsArray.length; idx++){ 
+                                        innertransaction.executeSql(queryI, bindingsArray[idx]);
+                                    };
+                                },
+                                function(error){
+                                    console.log("exp Rem: error inserting remote data in db");
+                                    console.log("exp Rem: sync 0");
+                                    self.syncing = 0;
+                                    console.log(error);
+                                },
+                                function(){
+                                    var d = new Date();
+                                    //$window.localStorage['lastExpenseSync']  = d.toISOString();
+                                    console.log("exp Rem: succesfully inserted remote data in db");
+                                    console.log("exp Rem: sync 0");
+                                    console.log("exp Rem: successfully synced expenses at " + $window.localStorage['lastExpenseSync'] );
+                                    $rootScope.$broadcast("syncFinished");
+                                    self.syncing = 0;
+                                }
+                            )
+
+    					}
+    				);
+    			}).error(function() {
+                    console.log("exp Rem: error fetching expense data from remote");
+                    console.log("exp Rem: sync 0");
+                    self.syncing = 0;
+                });
+            });    
         };
-        self.getAll = function(){
-            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1'").then(function(result){
+        self.getAll = function(date){
+            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = '"+date+"' and expense.deleted != '1'").then(function(result){
                 return DB.fetchAll(result);
             });
         };		
-        self.getMine = function(){
-            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1' AND expense.owner = '" + $window.localStorage['objectId'] + "'").then(function(result){
+        self.getMine = function(date){
+            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) >= '"+date+"' and expense.deleted != '1' AND expense.owner = '" + $window.localStorage['objectId'] + "' order by expense.date desc").then(function(result){
 				return DB.fetchAll(result);
 			});
         };		
 		
-        self.getAllByCatId = function(categoryId){
-            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = strftime('%Y-%m','now') and expense.deleted != '1' AND expense.categoryID = '" + categoryId + "'").then(function(result){
+        self.getAllByCatId = function(categoryId,date){
+            return DB.query("SELECT expense.*,categories.objectId AS categoryID_objectId,categories.budget AS categoryID_budget, categories.icon AS categoryID_icon, categories.name AS categoryID_name, categories.shared AS categoryID_shared, categories.createdAt AS categoryID_createdAt, categories.updatedAt AS categoryID_updatedAt FROM categories INNER JOIN expense ON expense.categoryId = categories.objectId where  strftime('%Y-%m', expense.date) = '"+date+"' and expense.deleted != '1' AND expense.categoryID = '" + categoryId + "'").then(function(result){
                 return DB.fetchAll(result);
             });
         };

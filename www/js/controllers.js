@@ -258,9 +258,37 @@ angular.module('starter.controllers', [])
 
 .controller('ExpensesCtrl', function($scope, $stateParams, Expenses, Expenses, Categories, $state, $ionicSlideBoxDelegate) {
 
+	var d = new Date();
+	var month = d.getMonth();
+	month++;
+	month = month.toString(); 
+	if (month.length == 1)
+		month = '0'+ month;
+	var year = d.getFullYear();
+	$scope.monthSelected = year + '-' + month;
+
+	$scope.doRefresh = function() {
+		var year = parseInt($scope.monthSelected.substr(0, 4));
+		var month = parseInt($scope.monthSelected.substr(5, 2));
+		if (month == 1){
+			month = 12;
+			year--;
+		} else{
+			month--;
+		}
+		month = month.toString();
+		if (month.length == 1)
+		month = '0'+ month;
+		$scope.monthSelected = year.toString() + '-' + month.toString();
+	    //$scope.todos.unshift({name: 'Incoming todo ' + Date.now()})
+	    $scope.$broadcast('scroll.refreshComplete');
+	    $scope.$apply();
+	    $scope.refreshView();
+  	};
+
 	$scope.refreshView = function(){
 		console.log("Updating ExpensesCtrl");
-		Expenses.getMine().then(function(data){
+		Expenses.getMine($scope.monthSelected).then(function(data){
 			$scope.expenses=data;
 		});
 	}
@@ -299,11 +327,18 @@ angular.module('starter.controllers', [])
 	
 	$scope.used = '0,00';	
 	$scope.budgetFlt = 0,00;
-	$scope.monthSelected = "2015-03";
+	var d = new Date();
+	var month = d.getMonth();
+	month++;
+	month = month.toString(); 
+	if (month.length == 1)
+		month = '0'+ month;
+	var year = d.getFullYear();
+	$scope.monthSelected = year + '-' + month;
 
 	$scope.refreshView = function(){
 		console.log("Updating CategoryDetailCtrl");
-		Expenses.getAllByCatId($stateParams.categoryId).then(function(data){
+		Expenses.getAllByCatId($stateParams.categoryId, $scope.monthSelected).then(function(data){
 			$scope.expenses = data;
 			var sum = 0;
 			for (var idx = 0;idx < data.length; idx++){
@@ -323,7 +358,8 @@ angular.module('starter.controllers', [])
 	$scope.$watch('expenseModified', $scope.refreshView);
 
 	$scope.monthChanged = function(monthSelected){
-
+		$scope.monthSelected = monthSelected;
+		$scope.refreshView();
 		console.log("month now is :" + monthSelected);
 	};
 
@@ -347,7 +383,9 @@ angular.module('starter.controllers', [])
   $scope.img =  $localstorage.get('img');
   $scope.signOut= function() {
 		$localstorage.set('SESSION_TOKEN',"");
-		$window.localStorage['lastExpenseSync'] = '2013-03-07T11:35:46.622Z';
+		$localstorage.set('lastExpenseSync', "2013-03-07T11:35:46.622Z");
+		$localstorage.set('lastCategoriesSync', "2013-03-07T11:35:46.622Z");
+		
 		DB.reset().then(function(){
 			$state.go('signin');
 		});

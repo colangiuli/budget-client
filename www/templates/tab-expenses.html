@@ -3,6 +3,8 @@
       <button class="button  button-icon icon ion-plus" ng-click="createNewExpense()"></button>
     </ion-nav-buttons>
   <ion-content>
+    <ion-refresher pulling-text="pull for older expenses" on-refresh="doRefresh()">
+    </ion-refresher>
     <ion-list>
       <ion-item class="item item-icon-left item-icon-right item-complex" ng-repeat="expense in expenses"  href="#/tab/expenses/{{expense.objectId}}">
          <i class="icon {{expense.categoryID_icon}}"></i>
