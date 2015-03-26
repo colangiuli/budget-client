@@ -339,6 +339,24 @@ angular.module('starter.services', [])
         return deferred.promise;
     };
 
+    self.reset = function() {
+        // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
+        self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
+ 
+        angular.forEach(DB_CONFIG.tables, function(table) {
+            var columns = [];
+ 
+            angular.forEach(table.columns, function(column) {
+                columns.push(column.name + ' ' + column.type);
+            });
+ 
+            var query = 'DROP TABLE IF EXISTS ' + table.name + '; CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
+            self.query(query);
+            console.log (query);
+            console.log('Table ' + table.name + ' initialized');
+        });
+    };
+
 
  
     self.query = function(query, bindings) {
