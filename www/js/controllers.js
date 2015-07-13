@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('SignInCtrl', function($scope, $state, Users, $window, $http, DB) {
+.controller('SignInCtrl', function($scope, $state, Users, $window, $http, DB,Expenses, Categories) {
 
 	$scope.user = {"username": $window.localStorage['username']};
 	if ((!!$window.localStorage['SESSION_TOKEN']) && ($window.localStorage['SESSION_TOKEN'] !="") ){
@@ -28,6 +28,11 @@ angular.module('starter.controllers', [])
 						// when the response is available
 						$window.localStorage['FRIENDS_ROLE_ID'] = data.results[0].objectId;
 						DB.init().then(function(){
+							console.log("Syncing");
+							Expenses.localSync();
+							//Expenses.remoteSync();
+							//Categories.localSync();
+							Categories.remoteSync();
 							$state.go('tab.categories');
 						});
 					});
@@ -73,6 +78,7 @@ angular.module('starter.controllers', [])
 	})  
 
     $scope.createNewExpense = function(catID) {
+    	console.log("creating new expense");
 		$scope.newExpense={};
 		$scope.newExpense.date = new Date();
 		
@@ -112,6 +118,7 @@ angular.module('starter.controllers', [])
     }
   
     $scope.editExpense= function(expense) {
+    	console.log("editing existing expense");
 		$scope.newExpense = angular.copy(expense);
 		$scope.strDotted = $scope.newExpense.value;
 		$scope.newExpense.date = new Date($scope.newExpense.date);
@@ -385,7 +392,7 @@ angular.module('starter.controllers', [])
 		$localstorage.set('SESSION_TOKEN',"");
 		$localstorage.set('lastExpenseSync', "2013-03-07T11:35:46.622Z");
 		$localstorage.set('lastCategoriesSync', "2013-03-07T11:35:46.622Z");
-		
+
 		DB.reset().then(function(){
 			$state.go('signin');
 		});
@@ -395,4 +402,11 @@ angular.module('starter.controllers', [])
 .controller('DebugCtrl', function($scope, $state, $localstorage, DB) {
   //$scope.debugs = "ddddd"
   $scope.test = $localstorage.get('log');
+  $scope.flushDebugLog= function() {
+  	$localstorage.set('log',"");
+  	$scope.test = "";
+  }
+  $scope.refreshDebugLog= function() {
+  	$scope.test = $localstorage.get('log');
+  }
 });

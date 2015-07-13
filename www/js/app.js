@@ -87,6 +87,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
   })
   
    .state('tab.category-detail', {
+    cache: false,
       url: '/categories/:categoryId',
       views: {
         'tab-categories': {
@@ -97,6 +98,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     })
 
   .state('tab.expenses', {
+    cache: false,
       url: '/expenses',
       views: {
         'tab-expenses': {
@@ -106,6 +108,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
       }
     })
     .state('tab.expense-detail', {
+      cache: false,
       url: '/expenses/:expenseId',
       views: {
         'tab-expenses': {
@@ -143,6 +146,7 @@ angular.module('starter', ['ionic', 'starter.controllers', 'starter.services'])
     }
   })
   .state('tab.debug', {
+    cache: false,
     url: '/debug',
     views: {
       'tab-debug': {
