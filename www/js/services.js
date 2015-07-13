@@ -17,8 +17,25 @@ angular.module('starter.services', [])
   }
 }])
 
+.factory('Camera', ['$q', function($q) {
 
-.factory('Categories',['$http','PARSE_CREDENTIALS','$window', 'DB',function($http,PARSE_CREDENTIALS,$window, DB){
+  return {
+    getPicture: function(options) {
+      var q = $q.defer();
+
+      navigator.camera.getPicture(function(result) {
+        // Do any magic you need
+        q.resolve(result);
+      }, function(err) {
+        q.reject(err);
+      }, { quality: 50, destinationType: Camera.DestinationType.DATA_URL});
+
+      return q.promise;
+    }
+  }
+}])
+
+.factory('Categories',['$http','PARSE_CREDENTIALS','$window', 'DB','$rootScope',function($http,PARSE_CREDENTIALS,$window, DB,$rootScope){
     var self = this;
     //self.lastSync = '2013-03-07T11:35:46.622Z';
 
@@ -108,6 +125,7 @@ angular.module('starter.services', [])
                                     //$window.localStorage['lastCategoriesSync'] = d.toISOString();
                                     console.log("successfully synced Categories at " + $window.localStorage['lastCategoriesSync']);
                                     console.log("cat sync 0");
+                                    $rootScope.$broadcast("syncFinished");
                                     self.syncing = 0;
                                 }
                             )

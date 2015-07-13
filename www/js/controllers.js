@@ -1,6 +1,6 @@
 angular.module('starter.controllers', [])
 
-.controller('SignInCtrl', function($scope, $state, Users, $window, $http, DB) {
+.controller('SignInCtrl', function($scope, $state, Users, $window, $http, DB,Expenses, Categories) {
 
 	$scope.user = {"username": $window.localStorage['username']};
 	if ((!!$window.localStorage['SESSION_TOKEN']) && ($window.localStorage['SESSION_TOKEN'] !="") ){
@@ -28,6 +28,11 @@ angular.module('starter.controllers', [])
 						// when the response is available
 						$window.localStorage['FRIENDS_ROLE_ID'] = data.results[0].objectId;
 						DB.init().then(function(){
+							console.log("Syncing");
+							Expenses.localSync();
+							//Expenses.remoteSync();
+							//Categories.localSync();
+							Categories.remoteSync();
 							$state.go('tab.categories');
 						});
 					});
@@ -40,7 +45,7 @@ angular.module('starter.controllers', [])
 })
 
 
-.controller('MainCtrl', function($scope, $rootScope, $localstorage, $stateParams, Expenses, Categories, $state, $ionicSlideBoxDelegate, $ionicModal, Users,Categories,Expenses) {
+.controller('MainCtrl', function($scope, $rootScope, $localstorage, $stateParams, Expenses, Categories, $state, Camera, $ionicSlideBoxDelegate, $ionicModal, Users,Categories,Expenses) {
 	$scope.dateFormat = 'dd/MM/yyyy';
 	$scope.expenseModified=0;
 	$scope.needSync = 0;
@@ -195,6 +200,8 @@ angular.module('starter.controllers', [])
 		if (selectedCat.shared == true){
 			$scope.newExpense.ACL["role:friendsOf_" + $localstorage.get('objectId')] = { "read": true};
 		}
+		//$scope.newExpense.photo = $scope.photo;
+
 		if(!!$scope.newExpense.objectId){
 			Expenses.edit($scope.newExpense.objectId, $scope.newExpense).then(function(data){
 			   $scope.closeExpenseModalPage();
@@ -233,6 +240,17 @@ angular.module('starter.controllers', [])
 		$scope.strDotted = leftString + "," + rightString;
 		$scope.fullString = leftString + rightString;
 	}
+
+
+	 $scope.getPhoto = function() {
+    Camera.getPicture().then(function(imageData) {
+      $scope.photo = "data:image/jpeg;base64," + imageData;	
+      //console.log(imageURI);
+    }, function(err) {
+      console.err(err);
+    });
+  };
+
 //////////////////////////////////////////////////////
 /////////      end expense handling functions
 ///////////////////////////////////////////////////////   
@@ -397,4 +415,11 @@ angular.module('starter.controllers', [])
 .controller('DebugCtrl', function($scope, $state, $localstorage, DB) {
   //$scope.debugs = "ddddd"
   $scope.test = $localstorage.get('log');
+  $scope.flushDebugLog= function() {
+  	$localstorage.set('log',"");
+  	$scope.test = "";
+  }
+  $scope.refreshDebugLog= function() {
+  $scope.test = $localstorage.get('log');
+  }
 });
