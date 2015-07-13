@@ -78,6 +78,7 @@ angular.module('starter.controllers', [])
 	})  
 
     $scope.createNewExpense = function(catID) {
+    	console.log("creating new expense");
 		$scope.newExpense={};
 		$scope.newExpense.date = new Date();
 		
@@ -117,6 +118,7 @@ angular.module('starter.controllers', [])
     }
   
     $scope.editExpense= function(expense) {
+    	console.log("editing existing expense");
 		$scope.newExpense = angular.copy(expense);
 		$scope.strDotted = $scope.newExpense.value;
 		$scope.newExpense.date = new Date($scope.newExpense.date);
