@@ -84,7 +84,7 @@ angular.module('starter.services', [])
                 }).success(function(data){
                     console.log("cat: received data from remote");
                     var queryD = "delete from categories where objectId = '?'";
-                    var queryI = "insert or replace into categories (objectId,budget,icon,name,shared,createdAt,updatedAt,status,deleted) values (?,?,?,?,?,?,?,'S',?)";
+                    var queryI = "insert into categories (objectId,budget,icon,name,shared,createdAt,updatedAt,status,deleted) values (?,?,?,?,?,?,?,'S',?)";
                     if (!!data.results)
                         data = data.results;
                     var tmpData = [];
@@ -95,26 +95,43 @@ angular.module('starter.services', [])
                     var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
              
                     DB.db.transaction(
-                        function(innertransaction) {
-                            for (var idx=0; idx<bindingsArray.length; idx++){ 
-                                innertransaction.executeSql(queryI, bindingsArray[idx]);
+                        function(transaction) {
+                            for (var i=0; i<bindingsArray.length; i++){ 
+                                queryD = "delete from categories where objectId = '" + bindingsArray[i][0] + "'";
+                                console.log(queryD);
+                                transaction.executeSql(queryD);
                             };
                         },
                         function(error){
                             self.syncing = 0;
                             console.log("cat sync 0");
-                            console.log("error inserting categories:");
                             console.log(error);
                         },
                         function(){
-                            var d = new Date();
-                            //$window.localStorage['lastCategoriesSync'] = d.toISOString();
-                            console.log("successfully synced Categories at " + $window.localStorage['lastCategoriesSync']);
-                            console.log("cat sync 0");
-                            $rootScope.$broadcast("syncFinished");
-                            self.syncing = 0;
+                            DB.db.transaction(
+                                function(innertransaction) {
+                                    for (var idx=0; idx<bindingsArray.length; idx++){ 
+                                        innertransaction.executeSql(queryI, bindingsArray[idx]);
+                                    };
+                                },
+                                function(error){
+                                    self.syncing = 0;
+                                    console.log("cat sync 0");
+                                    console.log("error inserting categories:");
+                                    console.log(error);
+                                },
+                                function(){
+                                    var d = new Date();
+                                    //$window.localStorage['lastCategoriesSync'] = d.toISOString();
+                                    console.log("successfully synced Categories at " + $window.localStorage['lastCategoriesSync']);
+                                    console.log("cat sync 0");
+                                    $rootScope.$broadcast("syncFinished");
+                                    self.syncing = 0;
+                                }
+                            )
+
                         }
-                    )
+                    );
 
                 }).error(function() {
                     console.log("error fetching category data from remote");
@@ -275,7 +292,7 @@ angular.module('starter.services', [])
                     });
          
                     var query = 'CREATE TABLE IF NOT EXISTS ' + table.name + ' (' + columns.join(',') + ')';
-                    self.query(query);
+                    //self.query(query);
                     transaction.executeSql(query);
                     console.log (query);
                     console.log('Table ' + table.name + ' initialized');
@@ -340,10 +357,10 @@ angular.module('starter.services', [])
         return deferred.promise;
     };
 
-  /*  self.reset = function() {
+    self.reset = function() {
         // Use self.db = window.sqlitePlugin.openDatabase({name: DB_CONFIG.name}); in production
         self.db = window.openDatabase(DB_CONFIG.name, '1.0', 'database', 655367);
-
+ 
         angular.forEach(DB_CONFIG.tables, function(table) {
             var columns = [];
  
@@ -357,7 +374,7 @@ angular.module('starter.services', [])
             console.log('Table ' + table.name + ' initialized');
         });
     };
-*/
+
 
  
     self.query = function(query, bindings) {
@@ -442,115 +459,103 @@ angular.module('starter.services', [])
 
         self.localSync = function(){
 
-            console.log("exp LOC: entering localSync");
+            console.log("exp: entering localSync");
             if(self.syncing != 0){
-                console.log("exp LOC: already syncing - exityng localsync current state: " + self.syncing);
+                console.log("exp: already syncing - exityng localsync current state: " + self.syncing);
                 return;
             }else{
                 self.syncing = 1;
-                console.log("exp LOC: sync 1");
+                console.log("exp: sync 1");
             }
-            console.log("exp LOC: getting modified local data");
+            console.log("exp: getting modified local data");
             DB.query("SELECT expense.*, categories.shared FROM expense inner join categories on expense.categoryId = categories.objectId where expense.status != 'S'").then(function(result){
                 if (result.rows.length == 0){
-                   console.log("exp LOC: no local data to sync");
-                   console.log("exp LOC: sync 2");
+                   console.log("exp: no more local data to sync");
+                   console.log("exp sync 2");
                    self.syncing = 2;
                    self.remoteSync();
                    return; 
                 }
-                console.log("exp LOC: " + result.rows.length + " rows to sync");
-                
-                var Requests = [];
-                for (var idx = 0;idx < result.rows.length; idx++)
-                {    
-                        var riga = result.rows.item(idx);
-                        var newExpense = {};
-                        if(riga.objectId.substr(0,4) == "FAKE"){
-                            newExpense.method = "POST";
-                            newExpense.path = "/1/classes/expenses";
-                        }else{
-                            newExpense.method = "PUT";
-                            newExpense.path = "/1/classes/expenses/"+riga.objectId;
-                        }
-                        newExpense.body = {};
-                        newExpense.body.date = riga.date;
-                        newExpense.body.note = riga.note;
-                        newExpense.body.photo = riga.photo;
-                        newExpense.body.value = riga.value;
-                        newExpense.body.deleted = riga.deleted;
-                        newExpense.body.shared = false;
-                        //-----------ACL
-                        newExpense.body.ACL = {};
-                        newExpense.body.ACL[$window.localStorage['objectId']] = { "read": true, "write": true};
-                        if (riga.shared == 'true'){
-                            newExpense.body.shared = true;
-                            newExpense.body.ACL["role:friendsOf_" + $window.localStorage['objectId']] = { "read": true};
-                        }
-                        newExpense.body.categoryID = {"__type": "Pointer", "className":"categories", "objectId": riga.categoryId};
-                        newExpense.body.owner = {"__type": "Pointer", "className":"_User", "objectId": $window.localStorage['objectId'] };
+                console.log("exp: " + result.rows.length + " rows to sync");
+                var riga = result.rows.item(0);
+                var newExpense = {};
+                newExpense.date = riga.date;
+                newExpense.note = riga.note;
+                newExpense.photo = riga.photo;
+                newExpense.value = riga.value;
+                newExpense.deleted = riga.deleted;
+                newExpense.shared = false;
+                //-----------ACL
+                newExpense.ACL = {};
+                newExpense.ACL[$window.localStorage['objectId']] = { "read": true, "write": true};
+                if (riga.shared == 'true'){
+                    newExpense.shared = true;
+                    newExpense.ACL["role:friendsOf_" + $window.localStorage['objectId']] = { "read": true};
+                }
+                //-----------category
+                newExpense.categoryID = {
+                    "__type": "Pointer",
+                    "className":"categories",
+                    "objectId": riga.categoryId
+                };
+                //----------owner
+                newExpense.owner = {
+                    "__type": "Pointer",
+                    "className":"_User",
+                    "objectId": $window.localStorage['objectId']
+                };
 
-                        //console.log (newExpense);
-                        Requests.push(newExpense);
-                }  
-                console.log("exp LOC: sending batch data ");
-                console.log(Requests);
-
-                $http.post('https://api.parse.com/1/batch',{"requests": Requests},{
-                    headers:{
-                        'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
-                        'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
-                        'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
-                        'Content-Type':'application/json'
-                    }
-                }).success(function(data){
-                    //[
-                    //{"success":{"updatedAt":"2015-07-08T09:55:20.538Z"}},
-                    //{"success":{"createdAt":"2015-07-08T09:55:20.536Z","objectId":"x0IO6X7Nx6"}}]
-                    console.log("exp LOC: received response");
-                    console.log(data);
-                    console.log("exp LOC: updating sent data in db");
-                    var  queryInsert = "update expense set status = 'S', objectId = ? where objectId = ?";
-                    var queryUpdate = "update expense set status = 'S' where objectId = ?";
-                    DB.db.transaction(
-                        function(updatetransaction) {
-                            for (var idx=0; idx<data.length; idx++){ 
-                                if (!data[idx].success){
-                                    console.log ("Exp LOC: failed sending " +result.rows.item(idx));
-                                    if (!!data[idx].error)
-                                        console.log (data[idx].error);
-                                    continue; 
-                                }
-                                if (Requests[idx].method == "PUT"){
-                                    updatetransaction.executeSql(queryUpdate, [result.rows.item(idx).objectId]);
-                                }else{
-                                    updatetransaction.executeSql(queryInsert, [ data[idx].success.objectId, result.rows.item(idx).objectId]);
-                                }
-                            };
-                        },
-                        function(error){
-                            console.log("exp LOC: error updating remote data in db");
-                            console.log("exp LOC: sync 0");
-                            console.log(error);
-                        },
-                        function(){
-                            var d = new Date();
-                            //$window.localStorage['lastExpenseSync']  = d.toISOString();
-                            console.log("exp LOC: succesfully synced remote data in db");
-                            console.log("exp LOC: sync 0");
-                            console.log("exp LOC: successfully synced expenses at " + $window.localStorage['lastExpenseSync'] );
+                console.log (newExpense);
+                if(riga.objectId.substr(0,4) == "FAKE"){
+                    $http.post('https://api.parse.com/1/classes/expenses',newExpense,{
+                        headers:{
+                            'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                            'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                            'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
+                            'Content-Type':'application/json'
                         }
-                    )
-                    console.log("exp LOC: finished sync");
-                    self.syncing = 0;
-                    self.localSync();
-
-                }).error(function() {
-                    console.log("exp LOC: error sending new expense " + riga.objectId + " to remote");
-                    self.syncing = 0;
-                    return;
-                });
-                 
+                    }).success(function(data){
+                        DB.query(
+                             "update expense set status = 'S', objectId = ? where objectId = ?",
+                            [data.objectId, riga.objectId]
+                            ).then(function(result){
+                                console.log("exp: " + riga.objectId + " synced. now it is: " + data.objectId);
+                                console.log("exp: sync 0");
+                                self.syncing = 0;
+                                self.localSync();
+                                return;
+                        });
+                    }).error(function() {
+                        console.log("error sending new expense " + riga.objectId + " to remote");
+                        self.syncing = 0;
+                        return;
+                    });
+                }else{
+                    newExpense.objectId = riga.objectId;
+                    return $http.put('https://api.parse.com/1/classes/expenses/'+riga.objectId,newExpense,{
+                        headers:{
+                            'X-Parse-Application-Id': PARSE_CREDENTIALS.APP_ID,
+                            'X-Parse-REST-API-Key':PARSE_CREDENTIALS.REST_API_KEY,
+                            'X-Parse-Session-Token': $window.localStorage['SESSION_TOKEN'],
+                            'Content-Type':'application/json'
+                        }
+                    }).success(function(data){
+                        DB.query(
+                             "update expense set status = 'S' where objectId = ?",
+                            [riga.objectId]
+                            ).then(function(result){
+                                console.log("exp: " + riga.objectId + " synced");
+                                console.log("exp: sync 0");
+                                self.syncing = 0;
+                                self.localSync();
+                                return;
+                        });
+                    }).error(function() {
+                        console.log("error updating expense " + riga.objectId  + " to remote");
+                        self.syncing = 0;
+                        return;
+                    });
+                }
             });
             
         }
@@ -568,7 +573,10 @@ angular.module('starter.services', [])
                 console.log("exp Rem: sync 3");
     			self.syncing = 3;
             }
-           
+            console.log("exp Rem: getting remote data");
+
+
+
             DB.query("SELECT max(updatedAt) as lastSync from expense").then(function(result){
             if ( (result.rows.length == 0) || (result.rows.item(0).lastSync == null) ){
                console.log("exp sync: lastSync is empty, init");
@@ -577,8 +585,6 @@ angular.module('starter.services', [])
                 $window.localStorage['lastExpenseSync'] = result.rows.item(0).lastSync;
                 console.log("cat sync: lastSync is " + $window.localStorage['lastExpenseSync'] );
             }
-             console.log("exp Rem: getting remote data");
-
 
                 return $http.get('https://api.parse.com/1/classes/expenses',{
                     headers:{
@@ -596,7 +602,7 @@ angular.module('starter.services', [])
                 }).success(function(data){
                     console.log("exp Rem: succesfully received remote data");
     				var queryD = "delete from expense where objectId = '?'";
-    				var queryI = "insert or replace into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'S',?)"
+    				var queryI = "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'S',?)"
     				if (!!data.results)
     					data = data.results;
     				var tmpData = [];
@@ -606,7 +612,22 @@ angular.module('starter.services', [])
 
 
     				var bindingsArray = typeof tmpData !== 'undefined' ? tmpData : [];
-    		        
+    		        console.log("exp Rem: deleting local data");
+    				DB.db.transaction(
+    					function(transaction) {
+    						for (var i=0; i<bindingsArray.length; i++){ 
+                                queryD = "delete from expense where objectId = '" + bindingsArray[i][0] + "'";
+                                console.log(queryD);
+    							transaction.executeSql(queryD);
+    						};
+    					},
+    					function(error){
+                            console.log("exp Rem: error deleting local data");
+                            console.log("exp Rem: sync 0");
+    						self.syncing = 0;
+    						console.log(error);
+    					},
+    					function(){
                             console.log("exp Rem: inserting remote data in db");
                             DB.db.transaction(
                                 function(innertransaction) {
@@ -631,7 +652,8 @@ angular.module('starter.services', [])
                                 }
                             )
 
-
+    					}
+    				);
     			}).error(function() {
                     console.log("exp Rem: error fetching expense data from remote");
                     console.log("exp Rem: sync 0");
@@ -670,7 +692,7 @@ angular.module('starter.services', [])
                  "insert into expense (objectId,categoryId,date,note,photo,value,createdAt,updatedAt,owner, owner_img, owner_username, owner_email, status, deleted) values (?,?,?,?,?,?,?,?,?,?,?,?,'N','0')",
                 ["FAKE_" + Date.now().toString() , data.categoryID_objectId, data.date.toISOString(), data.note, data.photo, data.value, tmpDate, tmpDate, $window.localStorage['objectId'], $window.localStorage['img'], $window.localStorage['username'], $window.localStorage['email']]
                 ).then(function(result){
-                console.log("Create: OK sync 0");
+                console.log("Delete: OK sync 0");
                 self.syncing = 0;     
                 return DB.fetchAll(result);
             });
