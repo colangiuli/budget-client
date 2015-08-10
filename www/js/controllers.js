@@ -191,6 +191,11 @@ angular.module('starter.controllers', [])
 	
 	$scope.setCategory = function(categorySelected) {
         $scope.newExpense.categoryID_objectId = categorySelected;
+        $scope.newExpense.categoryID = {
+		    "__type": "Pointer",
+		    "className":"categories",
+		    "objectId": $scope.newExpense.categoryID_objectId
+		};
     }
 	
 	$scope.createExpense = function(){
