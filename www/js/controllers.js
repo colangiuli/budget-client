@@ -260,7 +260,6 @@ angular.module('starter.controllers', [])
 })
 
 
-
 .controller('ExpenseDetailCtrl', function($scope, $stateParams, Expenses, Categories) {
 
 	$scope.dateFormat = 'dd/MM/yyyy';
@@ -404,12 +403,14 @@ angular.module('starter.controllers', [])
   $scope.img =  $localstorage.get('img');
   $scope.signOut= function() {
 		$localstorage.set('SESSION_TOKEN',"");
+
 		$localstorage.set('lastExpenseSync', "2013-03-07T11:35:46.622Z");
 		$localstorage.set('lastCategoriesSync', "2013-03-07T11:35:46.622Z");
-
+		
 		DB.reset().then(function(){
 			$state.go('signin');
 		});
+
 	};
 })
 
@@ -421,6 +422,6 @@ angular.module('starter.controllers', [])
   	$scope.test = "";
   }
   $scope.refreshDebugLog= function() {
-  	$scope.test = $localstorage.get('log');
+  $scope.test = $localstorage.get('log');
   }
 });
